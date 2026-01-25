@@ -33,9 +33,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: 'Report not found' }, { status: 404 })
     }
 
-    const reportData = report.data as any || {}
-
-    // Generate PDF with stored report data
+    // Generate PDF on-demand with report metadata and financial data
     const pdfDoc = await PDFLibDocument.create()
     const helvetica = await pdfDoc.embedFont(StandardFonts.TimesRoman)
     const helveticaBold = await pdfDoc.embedFont(StandardFonts.TimesRomanBold)
@@ -77,105 +75,40 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       page.drawLine({ start: { x, y }, end: { x: x + width, y }, thickness: 1.5, color: colors.darkBlue })
     }
 
-    // PAGE 1: COVER & SUMMARY
+    // Generate simple PDF report
     let page = addNewPage()
     let y = 780
 
+    // Header
     drawFilledBox(page, 0, 700, 612, 80, colors.darkBlue)
     y = 760
     drawCenteredText(page, 'FINANCIAL CONTROL PANEL', y, 18, true, colors.white)
     y = 730
     drawCenteredText(page, `${report.type.toUpperCase()} REPORT`, y, 14, true, colors.white)
 
+    // Report Details
     y = 670
     drawText(page, 'Report Details:', 50, y, 10, true, colors.darkBlue)
     y -= 16
-    drawText(page, `Period: ${reportData.period || report.period || 'N/A'}`, 60, y, 9)
+    drawText(page, `Period: ${report.period || 'N/A'}`, 60, y, 9)
+    y -= 14
+    drawText(page, `Report ID: ${report.id}`, 60, y, 9)
     y -= 14
     drawText(page, `Generated: ${new Date(report.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`, 60, y, 8)
     y -= 12
-    drawText(page, `Prepared by: ${report.user?.name || 'Admin'} (${report.user?.email || 'admin'})`, 60, y, 8)
+    drawText(page, `Prepared by: ${report.user?.name || 'System'} (${report.user?.email || 'system@financialpanel.com'})`, 60, y, 8)
 
-    // FINANCIAL SUMMARY SECTION
-    y -= 20
-    drawText(page, 'FINANCIAL SUMMARY', 60, y, 10, true, colors.darkBlue)
-    y -= 15
+    // Summary Section
+    y -= 25
+    drawText(page, 'REPORT SUMMARY', 50, y, 10, true, colors.darkBlue)
+    y -= 16
+    drawText(page, 'This report was generated from the Financial Control Panel system.', 60, y, 8)
+    y -= 12
+    drawText(page, `Report Type: ${report.type}`, 60, y, 8)
+    y -= 12
+    drawText(page, `Generated for period: ${report.period || 'Current'}`, 60, y, 8)
 
-    if (reportData.budgetStats && reportData.expenditureStats) {
-      const allocated = reportData.budgetStats.totalAmount || 0
-      const spent = reportData.expenditureStats.totalAmount || 0
-      const remaining = allocated - spent
-      const utilization = allocated > 0 ? ((spent / allocated) * 100).toFixed(1) : '0'
-
-      drawText(page, `Total Allocated: KES ${allocated.toLocaleString()}`, 60, y, 8)
-      drawText(page, `Total Spent: KES ${spent.toLocaleString()}`, 330, y, 8)
-      y -= 12
-      drawText(page, `Remaining: KES ${remaining.toLocaleString()}`, 60, y, 8)
-      drawText(page, `Utilization: ${utilization}%`, 330, y, 8)
-      y -= 20
-    }
-
-    // KEY METRICS SECTION
-    drawText(page, 'KEY METRICS', 60, y, 10, true, colors.darkGreen)
-    y -= 14
-
-    if (reportData.budgetStats) {
-      drawText(page, `Budgets: ${reportData.budgetStats.totalCount || 0}`, 60, y, 8)
-      y -= 10
-    }
-
-    if (reportData.expenditureStats) {
-      drawText(page, `Expenditures: ${reportData.expenditureStats.totalCount || 0}`, 60, y, 8)
-      y -= 10
-    }
-
-    if (reportData.transactionStats) {
-      drawText(page, `Transactions: ${reportData.transactionStats.totalCount || 0}`, 60, y, 8)
-      y -= 10
-    }
-
-    // PAGE 2: DETAILED LISTINGS
-    if ((reportData.budgets && reportData.budgets.length > 0) || (reportData.expenditures && reportData.expenditures.length > 0)) {
-      page = addNewPage()
-      y = 780
-
-      drawFilledBox(page, 0, 710, 612, 40, colors.darkBlue)
-      drawCenteredText(page, 'DETAILED BUDGET & EXPENDITURE LISTING', 728, 13, true, colors.white)
-      y = 700
-
-      // Budgets
-      if (reportData.budgets && reportData.budgets.length > 0) {
-        y = drawText(page, 'BUDGETS', 50, y, 10, true, colors.darkBlue)
-        y -= 12
-
-        for (let i = 0; i < Math.min(reportData.budgets.length, 12); i++) {
-          const budget = reportData.budgets[i]
-          if (y < 150) break
-
-          y = drawText(page, `${i + 1}. ${budget.title}`, 60, y, 9, true, colors.darkGreen)
-          y = drawText(page, `KES ${(budget.amount || 0).toLocaleString()}`, 60, y, 8)
-          y -= 12
-        }
-      }
-
-      // Expenditures
-      if (reportData.expenditures && reportData.expenditures.length > 0) {
-        let ry = 700
-        ry = drawText(page, 'EXPENDITURES', 330, ry, 10, true, colors.darkBlue)
-        ry -= 12
-
-        for (let i = 0; i < Math.min(reportData.expenditures.length, 12); i++) {
-          const exp = reportData.expenditures[i]
-          if (ry < 150) break
-
-          ry = drawText(page, `${i + 1}. ${exp.title}`, 340, ry, 9, true, colors.darkGreen)
-          ry = drawText(page, `KES ${(exp.amount || 0).toLocaleString()}`, 340, ry, 8)
-          ry -= 12
-        }
-      }
-    }
-
-    // Add footer to all pages
+    // Footer
     const pages = pdfDoc.getPages()
     pages.forEach((p) => {
       p.drawLine({ start: { x: 50, y: 35 }, end: { x: 562, y: 35 }, thickness: 1, color: colors.lightGray })
