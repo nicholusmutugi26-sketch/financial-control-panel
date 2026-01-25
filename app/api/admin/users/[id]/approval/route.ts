@@ -2,6 +2,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
+import { sendNotification } from '@/lib/notifications'
 
 export async function POST(
   req: NextRequest,
@@ -16,10 +17,24 @@ export async function POST(
   const { action } = await req.json()
 
   if (action === 'approve') {
-    await prisma.user.update({
+    const user = await prisma.user.update({
       where: { id: params.id },
       data: { isApproved: true }
     })
+    
+    // Send approval notification to the user
+    try {
+      await sendNotification({
+        userId: params.id,
+        title: 'Registration Approved',
+        message: 'Your registration has been approved! You can now access the system.',
+        type: 'user_approved',
+        data: { userId: params.id }
+      })
+    } catch (error) {
+      console.error('Failed to send approval notification:', error)
+    }
+    
     return NextResponse.json({ message: 'User approved' })
   } else if (action === 'reject') {
     try {
