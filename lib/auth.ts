@@ -88,11 +88,14 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string
         session.user.role = token.role as "ADMIN" | "USER"
         ;(session.user as any).isApproved = token.isApproved as boolean
-        // attempt to populate latest image from DB if available
+        // Refresh user data from database on each session to get latest role and approval status
         try {
           const dbUser = await prisma.user.findUnique({ where: { id: token.id as string } })
-          session.user.image = dbUser?.profileImage || (token as any).image || null
-          ;(session.user as any).isApproved = dbUser?.isApproved
+          if (dbUser) {
+            session.user.role = (dbUser.role || 'USER') as "ADMIN" | "USER"
+            ;(session.user as any).isApproved = dbUser.isApproved
+            session.user.image = dbUser.profileImage || (token as any).image || null
+          }
         } catch (e) {
           session.user.image = (token as any).image || null
         }
