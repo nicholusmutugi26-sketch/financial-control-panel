@@ -2,7 +2,7 @@
   "name": "Finance Panel",
   "short_name": "Finance",
   "description": "Real-time financial management for families and partners",
-  "start_url": "/dashboard",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
