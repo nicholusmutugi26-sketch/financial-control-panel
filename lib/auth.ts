@@ -92,7 +92,7 @@ export const authOptions: NextAuthOptions = {
         try {
           const dbUser = await prisma.user.findUnique({ where: { id: token.id as string } })
           session.user.image = dbUser?.profileImage || (token as any).image || null
-          ;(session.user as any).isApproved = dbUser?.isApproved ?? true
+          ;(session.user as any).isApproved = dbUser?.isApproved
         } catch (e) {
           session.user.image = (token as any).image || null
         }
