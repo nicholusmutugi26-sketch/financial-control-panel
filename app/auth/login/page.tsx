@@ -55,6 +55,8 @@ export default function LoginPage() {
       }
 
       toast.success('Logged in successfully')
+      // Let NextAuth redirect callback handle the navigation based on role
+      // Redirect to dashboard and let the auth middleware/redirect callback handle role-based routing
       router.push('/dashboard')
       router.refresh()
     } catch (error) {

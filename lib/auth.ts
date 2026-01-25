@@ -125,10 +125,14 @@ export const authOptions: NextAuthOptions = {
       }
       return session
     },
-    async redirect({ url, baseUrl }) {
-      // Redirect to dashboard after login
+    async redirect({ url, baseUrl, token }) {
+      // After login, redirect to role-specific dashboard
       if (url === baseUrl) {
-        return `${baseUrl}/dashboard`
+        const role = token?.role as string || 'USER'
+        if (role === 'ADMIN') {
+          return `${baseUrl}/dashboard/admin/dashboard`
+        }
+        return `${baseUrl}/dashboard/user/dashboard`
       }
       return url
     }
