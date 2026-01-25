@@ -307,6 +307,7 @@ model Report {
   type      String
   period    String?
   filePath  String
+  data      Json?    // Store report data to regenerate PDF on download
   createdBy String
   createdAt DateTime @default(now())
 

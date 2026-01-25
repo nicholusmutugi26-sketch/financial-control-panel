@@ -910,17 +910,30 @@ export async function POST(request: NextRequest) {
 
     const pdfBytes = await pdfDoc.save()
     
-    // Don't write to disk in production (Vercel serverless)
-    // Instead, store PDF bytes in database temporarily or return directly
-    // For now, we'll store the report metadata and stream PDF on download
+    // Store report data (for regenerating PDF on download)
+    const reportDataToStore = {
+      type: reportData.type,
+      period: reportData.period,
+      generatedAt: reportData.generatedAt,
+      generatedBy: reportData.generatedBy,
+      budgetStats: reportData.budgetStats,
+      expenditureStats: reportData.expenditureStats,
+      transactionStats: reportData.transactionStats,
+      projectStats: reportData.projectStats,
+      budgets: reportData.budgets?.slice(0, 50), // Store first 50 items
+      expenditures: reportData.expenditures?.slice(0, 50),
+      projects: reportData.projects?.slice(0, 50),
+      transactions: reportData.transactions?.slice(0, 50),
+    }
 
-    // Persist report record
+    // Persist report record with data
     const persistedReport = await prisma.report.create({
       data: {
         id: reportId,
         type: validatedData.type,
         period: reportData.period,
-        filePath: `/api/reports/${reportId}/download`, // Store the API endpoint, not a file path
+        filePath: `/api/reports/${reportId}/download`,
+        data: reportDataToStore as any,
         createdBy: session.user.id,
       }
     })
