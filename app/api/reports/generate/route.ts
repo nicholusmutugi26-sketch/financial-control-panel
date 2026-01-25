@@ -910,30 +910,13 @@ export async function POST(request: NextRequest) {
 
     const pdfBytes = await pdfDoc.save()
     
-    // Store report data (for regenerating PDF on download)
-    const reportDataToStore = {
-      type: reportData.type,
-      period: reportData.period,
-      generatedAt: reportData.generatedAt,
-      generatedBy: reportData.generatedBy,
-      budgetStats: reportData.budgetStats,
-      expenditureStats: reportData.expenditureStats,
-      transactionStats: reportData.transactionStats,
-      projectStats: reportData.projectStats,
-      budgets: reportData.budgets?.slice(0, 50), // Store first 50 items
-      expenditures: reportData.expenditures?.slice(0, 50),
-      projects: reportData.projects?.slice(0, 50),
-      transactions: reportData.transactions?.slice(0, 50),
-    }
-
-    // Persist report record with data
+    // Persist report record
     const persistedReport = await prisma.report.create({
       data: {
         id: reportId,
         type: validatedData.type,
         period: reportData.period,
         filePath: `/api/reports/${reportId}/download`,
-        data: reportDataToStore as any,
         createdBy: session.user.id,
       }
     })
