@@ -7,9 +7,11 @@ import { PDFDocument as PDFLibDocument, StandardFonts, rgb } from 'pdf-lib'
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session || session.user.role !== 'ADMIN') {
+    
+    // Allow both ADMIN and USER roles to download reports
+    if (!session) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Unauthorized - No session' },
         { status: 401 }
       )
     }
