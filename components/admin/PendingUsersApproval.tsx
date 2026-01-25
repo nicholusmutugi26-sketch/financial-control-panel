@@ -22,9 +22,10 @@ interface PendingUsersApprovalProps {
   onApprovalChange?: () => void
 }
 
-export default function PendingUsersApproval({ pendingUsers, onApprovalChange }: PendingUsersApprovalProps) {
+export default function PendingUsersApproval({ pendingUsers: initialUsers, onApprovalChange }: PendingUsersApprovalProps) {
   const router = useRouter()
   const [loading, setLoading] = useState<string | null>(null)
+  const [users, setUsers] = useState<PendingUser[]>(initialUsers)
 
   const handleApprove = async (userId: string) => {
     if (!confirm('Approve this user?')) return
@@ -40,9 +41,14 @@ export default function PendingUsersApproval({ pendingUsers, onApprovalChange }:
 
       if (!res.ok) throw new Error(json?.error || 'Failed to approve')
 
-      setTimeout(() => router.refresh(), 500)
+      // Remove user from local state immediately
+      setUsers(users.filter(u => u.id !== userId))
+      
       toast.success('User approved successfully')
       onApprovalChange?.()
+      
+      // Refresh page data in background
+      setTimeout(() => router.refresh(), 500)
     } catch (err: any) {
       toast.error(err.message || 'Failed to approve user')
     } finally {
@@ -63,10 +69,15 @@ export default function PendingUsersApproval({ pendingUsers, onApprovalChange }:
       const json = await res.json()
 
       if (!res.ok) throw new Error(json?.error || 'Failed to reject')
-setTimeout(() => router.refresh(), 500)
+      
+      // Remove user from local state immediately
+      setUsers(users.filter(u => u.id !== userId))
       
       toast.success('User rejected and deleted')
       onApprovalChange?.()
+      
+      // Refresh page data in background
+      setTimeout(() => router.refresh(), 500)
     } catch (err: any) {
       toast.error(err.message || 'Failed to reject user')
     } finally {
@@ -74,7 +85,7 @@ setTimeout(() => router.refresh(), 500)
     }
   }
 
-  if (pendingUsers.length === 0) {
+  if (users.length === 0) {
     return (
       <Card>
         <CardHeader>
@@ -95,12 +106,12 @@ setTimeout(() => router.refresh(), 500)
       <CardHeader>
         <CardTitle>Pending User Approvals</CardTitle>
         <CardDescription>
-          {pendingUsers.length} user{pendingUsers.length !== 1 ? 's' : ''} awaiting approval
+          {users.length} user{users.length !== 1 ? 's' : ''} awaiting approval
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {pendingUsers.map((user) => (
+          {users.map((user) => (
             <div
               key={user.id}
               className="flex items-center justify-between p-4 border rounded-lg bg-amber-50"
