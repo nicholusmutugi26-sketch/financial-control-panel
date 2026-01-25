@@ -34,7 +34,7 @@ async function main() {
       amount: 100000,
       priority: 'NORMAL',
       disbursementType: 'FULL',
-      createdBy: user.id,
+      createdBy: admin.id,
       status: 'APPROVED',
       allocatedAmount: 50000,
     },
@@ -47,7 +47,7 @@ async function main() {
       description: 'Weekly grocery shopping',
       amount: 15000,
       priority: 'NORMAL',
-      createdBy: user.id,
+      createdBy: admin.id,
       budgetId: budget.id,
       status: 'APPROVED',
     },
@@ -82,7 +82,7 @@ async function main() {
     data: {
       title: 'Home Renovation',
       description: 'Renovate kitchen and living room',
-      createdBy: user.id,
+      createdBy: admin.id,
       status: 'PROPOSED',
     },
   })
