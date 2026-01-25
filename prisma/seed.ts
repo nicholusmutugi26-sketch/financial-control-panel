@@ -17,6 +17,7 @@ async function main() {
       password: adminPassword,
       role: 'ADMIN',
       phoneNumber: '254792919470',
+      isApproved: true,
     },
   })
 
