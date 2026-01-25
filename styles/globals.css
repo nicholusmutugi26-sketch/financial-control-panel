@@ -1,0 +1,242 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light theme with black box shadows */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.6%;
+    --card: 0 0% 96.3%;
+    --card-foreground: 0 0% 3.6%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.6%;
+    --primary: 262 80% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 39 92% 55%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 45.1%;
+    --muted-foreground: 0 0% 39%;
+    --accent: 197 88% 58%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 96.3%;
+    --ring: 262 80% 60%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* Alternative dark option if user switches */
+    --background: 240 10% 13%;
+    --foreground: 240 10% 95%;
+    --card: 240 10% 18%;
+    --card-foreground: 240 10% 95%;
+    --popover: 240 10% 18%;
+    --popover-foreground: 240 10% 95%;
+    --primary: 262 80% 60%;
+    --primary-foreground: 240 10% 13%;
+    --secondary: 39 92% 55%;
+    --secondary-foreground: 240 10% 13%;
+    --muted: 240 9% 30%;
+    --muted-foreground: 240 8% 70%;
+    --accent: 197 88% 58%;
+    --accent-foreground: 240 10% 13%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 240 9% 25%;
+    --input: 240 9% 22%;
+    --ring: 262 80% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-400 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-600;
+}
+
+/* Smooth transitions */
+* {
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Focus styles */
+:focus-visible {
+  @apply outline-none ring-2 ring-ring ring-offset-2;
+}
+
+/* Navigation animated gradient for active nav items */
+@layer components {
+  .nav-gradient {
+    background: linear-gradient(90deg, rgba(14,165,233,1) 0%, rgba(99,102,241,1) 50%, rgba(139,92,246,1) 100%);
+    background-size: 200% 200%;
+    animation: gradient-move 6s ease infinite;
+    color: white;
+  }
+
+  @keyframes gradient-move {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .nav-item {
+    @apply relative overflow-hidden;
+  }
+
+  .nav-item .icon {
+    @apply transition-colors duration-200;
+  }
+
+  .nav-item .label {
+    @apply transition-colors duration-200;
+  }
+}
+
+/* Auth page background and card float animation */
+@layer utilities {
+  .auth-bg {
+    background: linear-gradient(135deg, rgba(14,165,233,0.08), rgba(99,102,241,0.06));
+  }
+
+  .card-float {
+    animation: float-card 6s ease-in-out infinite;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255,255,255,0.6);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  @keyframes float-card {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-6px); }
+    100% { transform: translateY(0px); }
+  }
+}
+
+/* Entrance animation for auth cards */
+@layer components {
+  .auth-entrance {
+    animation: auth-entrance 700ms cubic-bezier(.2,.9,.2,1) both;
+  }
+
+  @keyframes auth-entrance {
+    0% { opacity: 0; transform: translateY(18px) scale(0.985); filter: blur(6px); }
+    60% { opacity: 1; transform: translateY(-4px) scale(1.01); filter: blur(0px); }
+    100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  }
+
+  /* Animated decorative orbs for auth background */
+  .auth-orb {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(36px);
+    opacity: 0.7;
+    mix-blend-mode: screen;
+    animation: orb-move 10s linear infinite;
+  }
+
+  .auth-orb.orb-1 { width: 220px; height: 220px; background: radial-gradient(circle at 30% 30%, rgba(99,102,241,0.65), rgba(99,102,241,0.15)); top: -40px; left: -60px; }
+  .auth-orb.orb-2 { width: 160px; height: 160px; background: radial-gradient(circle at 70% 70%, rgba(14,165,233,0.55), rgba(14,165,233,0.08)); bottom: -50px; right: -40px; animation-duration: 14s; }
+
+  @keyframes orb-move {
+    0% { transform: translate(0,0) scale(1); }
+    50% { transform: translate(20px,-12px) scale(1.05); }
+    100% { transform: translate(0,0) scale(1); }
+  }
+
+  /* Input focus glow */
+  .input-glow:focus {
+    box-shadow: 0 8px 30px rgba(99,102,241,0.12), 0 2px 8px rgba(14,165,233,0.06) !important;
+    transform: translateY(-1px);
+  }
+
+  /* Button hover punch */
+  .btn-punch {
+    transition: transform 160ms cubic-bezier(.2,.9,.2,1), box-shadow 160ms;
+  }
+  .btn-punch:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 12px 30px rgba(2,6,23,0.12); }
+
+  /* Optimized card styling */
+  .card-compact {
+    @apply rounded-lg border shadow-sm transition-all duration-200 hover:shadow-md hover:border-primary/20;
+  }
+
+  .card-elevated {
+    @apply rounded-lg border shadow-sm transition-all duration-200 hover:shadow-lg hover:-translate-y-1 hover:border-primary/30;
+  }
+
+  .stat-card {
+    @apply bg-gradient-to-br from-white/60 to-white/30 dark:from-slate-800/40 dark:to-slate-800/20 backdrop-blur-sm rounded-xl border border-white/20 dark:border-slate-700/30 shadow-lg hover:shadow-xl transition-all duration-300;
+  }
+
+  .stat-card-small {
+    @apply rounded-lg border bg-gradient-to-br from-card/80 to-card shadow-sm hover:shadow-md transition-all duration-200;
+  }
+
+  /* Badge color variants */
+  .badge-success {
+    @apply bg-emerald-100 text-emerald-900 dark:bg-emerald-900/40 dark:text-emerald-300;
+  }
+
+  .badge-warning {
+    @apply bg-amber-100 text-amber-900 dark:bg-amber-900/40 dark:text-amber-300;
+  }
+
+  .badge-info {
+    @apply bg-sky-100 text-sky-900 dark:bg-sky-900/40 dark:text-sky-300;
+  }
+
+  .badge-pending {
+    @apply bg-purple-100 text-purple-900 dark:bg-purple-900/40 dark:text-purple-300;
+  }
+
+  /* Grid optimization */
+  .grid-auto {
+    @apply grid gap-3 sm:gap-4 md:gap-5;
+  }
+
+  .grid-2-cols {
+    @apply grid-auto grid-cols-1 sm:grid-cols-2;
+  }
+
+  .grid-3-cols {
+    @apply grid-auto grid-cols-1 md:grid-cols-2 lg:grid-cols-3;
+  }
+
+  .grid-4-cols {
+    @apply grid-auto grid-cols-1 sm:grid-cols-2 lg:grid-cols-4;
+  }
+
+  /* Spacing utilities */
+  .space-compact {
+    @apply space-y-2 sm:space-y-3;
+  }
+
+  .space-comfortable {
+    @apply space-y-4 sm:space-y-5;
+  }
+}
+
+

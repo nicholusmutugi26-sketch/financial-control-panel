@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - Financial Control Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+        }
+        
+        .container {
+            text-align: center;
+            padding: 2rem;
+            max-width: 600px;
+        }
+        
+        .icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #ffffff;
+        }
+        
+        p {
+            font-size: 1.1rem;
+            color: #a0a0a0;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        
+        .offline-info {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(75, 85, 99, 0.3);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+        
+        .offline-info h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: #e0e0e0;
+        }
+        
+        .offline-info ul {
+            list-style: none;
+            margin-left: 0;
+        }
+        
+        .offline-info li {
+            padding: 0.5rem 0;
+            color: #b0b0b0;
+        }
+        
+        .button {
+            display: inline-block;
+            padding: 0.75rem 2rem;
+            background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .button:hover {
+            background: linear-gradient(135deg, #1d4ed8 0%, #4338ca 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+        }
+        
+        .button:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">📡</div>
+        <h1>No Internet Connection</h1>
+        <p>You're currently offline. Some features may not be available.</p>
+        
+        <div class="offline-info">
+            <h2>What you can do:</h2>
+            <ul>
+                <li>✓ View previously loaded pages (from cache)</li>
+                <li>✓ Check your offline data</li>
+                <li>✗ Cannot sync new data to server</li>
+                <li>✗ Cannot access new resources</li>
+            </ul>
+        </div>
+        
+        <button class="button" onclick="window.location.href='/'">
+            Try Again
+        </button>
+    </div>
+</body>
+</html>

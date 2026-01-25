@@ -1,0 +1,317 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String?
+  password     String?
+  role         String?
+  profileImage String?
+  isApproved   Boolean   @default(false)
+  lastLogin    DateTime?
+  phoneNumber  String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  notifications        Notification[]
+  systemSettings       SystemSetting[]
+  preference           UserPreference?
+  auditLogs            AuditLog[]
+  budgets              Budget[]
+  approvedBudgets      Budget[]              @relation("BudgetApprovedBy")
+  budgetRevisions      BudgetRevision[]
+  reports              Report[]
+  budgetItems          BudgetItem[]
+  supplementaryCreated SupplementaryBudget[]
+  expenditures         Expenditure[]
+  projects             Project[]
+  votes                Vote[]
+  transactions         Transaction[]
+  remittances          Remittance[]
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      String
+  read      Boolean  @default(false)
+  data      Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([read])
+  @@index([createdAt])
+}
+
+model SystemSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  category    String
+  updatedBy   String
+  updatedAt   DateTime @default(now())
+
+  user User @relation(fields: [updatedBy], references: [id])
+
+  @@index([key])
+  @@index([category])
+}
+
+model UserPreference {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  settings  Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  entity    String
+  entityId  String
+  userId    String
+  changes   Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model Remittance {
+  id         String    @id @default(cuid())
+  userId     String
+  amount     Int
+  note       String?
+  proof      String?
+  status     String    @default("PENDING")
+  verifiedBy String?
+  verifiedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+}
+
+model Budget {
+  id               String    @id @default(cuid())
+  title            String
+  description      String?
+  amount           Int
+  allocatedAmount  Int?      @default(0)
+  priority         String?
+  disbursementType String?
+  status           String?
+  createdBy        String
+  approvedById     String?
+  approvedBy       User?     @relation("BudgetApprovedBy", fields: [approvedById], references: [id])
+  approvedAt       DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  user          User                  @relation(fields: [createdBy], references: [id])
+  batches       Batch[]
+  items         BudgetItem[]
+  supplementary SupplementaryBudget[]
+  revisions     BudgetRevision[]
+  expenditures  Expenditure[]
+  transactions  Transaction[]
+  Project       Project[]
+
+  @@index([createdBy])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model BudgetRevision {
+  id        String   @id @default(cuid())
+  budgetId  String
+  userId    String
+  notes     String?
+  changes   Json?
+  status    String   @default("PENDING")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  budget Budget @relation(fields: [budgetId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([budgetId])
+  @@index([userId])
+  @@index([status])
+}
+
+model BudgetItem {
+  id        String   @id @default(cuid())
+  budgetId  String
+  name      String
+  unitPrice Int
+  quantity  Int?     @default(1)
+  total     Int? // unitPrice * quantity (denormalized optional)
+  createdBy String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  budget Budget @relation(fields: [budgetId], references: [id])
+  user   User   @relation(fields: [createdBy], references: [id])
+
+  @@index([budgetId])
+}
+
+model SupplementaryBudget {
+  id         String    @id @default(cuid())
+  budgetId   String
+  amount     Int
+  reason     String?
+  status     String    @default("PENDING")
+  createdBy  String
+  approvedBy String?
+  approvedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  budget  Budget @relation(fields: [budgetId], references: [id])
+  creator User   @relation(fields: [createdBy], references: [id])
+
+  @@index([budgetId])
+  @@index([status])
+}
+
+model Batch {
+  id        String   @id @default(cuid())
+  budgetId  String
+  amount    Int
+  status    String?
+  createdAt DateTime @default(now())
+
+  budget Budget @relation(fields: [budgetId], references: [id])
+
+  @@index([budgetId])
+}
+
+model Expenditure {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  amount      Int
+  priority    String?
+  createdBy   String
+  budgetId    String?
+  status      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user   User              @relation(fields: [createdBy], references: [id])
+  budget Budget?           @relation(fields: [budgetId], references: [id])
+  items  ExpenditureItem[]
+
+  @@index([createdBy])
+  @@index([budgetId])
+  @@index([status])
+}
+
+model ExpenditureItem {
+  id            String  @id @default(cuid())
+  expenditureId String
+  name          String
+  description   String?
+  amount        Int
+
+  expenditure Expenditure @relation(fields: [expenditureId], references: [id])
+
+  @@index([expenditureId])
+}
+
+model Project {
+  id                  String   @id @default(cuid())
+  title               String
+  description         String?
+  createdBy           String
+  status              String?  @default("PROPOSED")
+  approvalType        String?  @default("DIRECT")  // DIRECT or VOTING
+  adminDecision       String?  // APPROVED, REJECTED, PENDING
+  budgetId            String?
+  progressPercentage  Int      @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  user   User    @relation(fields: [createdBy], references: [id])
+  votes  Vote[]
+  budget Budget? @relation(fields: [budgetId], references: [id])
+
+  @@index([createdBy])
+  @@index([status])
+  @@index([adminDecision])
+}
+
+model Vote {
+  id        String   @id @default(cuid())
+  projectId String
+  userId    String
+  vote      Int?     // 1 = in favor, -1 = against, 0 = abstain, null = not voted
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+  @@index([projectId])
+  @@index([userId])
+}
+
+model Transaction {
+  id              String   @id @default(cuid())
+  userId          String
+  budgetId        String?
+  amount          Int
+  type            String?  @default("DISBURSEMENT")
+  status          String?  @default("PENDING")
+  paymentMethod   String?
+  reference       String?
+  mpesaCode       String?
+  metadata        Json?
+  createdAt       DateTime @default(now())
+
+  user   User    @relation(fields: [userId], references: [id])
+  budget Budget? @relation(fields: [budgetId], references: [id])
+
+  @@index([userId])
+  @@index([budgetId])
+}
+
+model Report {
+  id        String   @id @default(cuid())
+  type      String
+  period    String?
+  filePath  String
+  createdBy String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [createdBy], references: [id])
+
+  @@index([createdBy])
+  @@index([createdAt])
+}

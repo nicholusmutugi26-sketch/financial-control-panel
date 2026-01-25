@@ -1,0 +1,79 @@
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
+import { NextRequest, NextResponse } from 'next/server'
+
+export async function POST(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const session = await getServerSession(authOptions)
+
+  if (!session || session.user.role !== 'ADMIN') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { action } = await req.json()
+
+  if (action === 'approve') {
+    await prisma.user.update({
+      where: { id: params.id },
+      data: { isApproved: true }
+    })
+    return NextResponse.json({ message: 'User approved' })
+  } else if (action === 'reject') {
+    try {
+      await prisma.$transaction(async (tx) => {
+        const userId = params.id
+
+        // Delete all related records in the correct order to avoid foreign key conflicts
+        await tx.auditLog.deleteMany({ where: { userId } })
+        await tx.notification.deleteMany({ where: { userId } })
+        await tx.userPreference.deleteMany({ where: { userId } })
+        await tx.systemSetting.deleteMany({ where: { updatedBy: userId } })
+        
+        // Delete expenditure items and expenditures
+        const expenditures = await tx.expenditure.findMany({ where: { createdBy: userId } })
+        for (const exp of expenditures) {
+          await tx.expenditureItem.deleteMany({ where: { expenditureId: exp.id } })
+        }
+        await tx.expenditure.deleteMany({ where: { createdBy: userId } })
+        
+        // Delete budget revisions
+        await tx.budgetRevision.deleteMany({ where: { userId } })
+        
+        // Delete budget items and supplementary budgets
+        const budgets = await tx.budget.findMany({ where: { createdBy: userId } })
+        for (const budget of budgets) {
+          await tx.budgetItem.deleteMany({ where: { budgetId: budget.id } })
+          await tx.supplementaryBudget.deleteMany({ where: { budgetId: budget.id } })
+          await tx.batch.deleteMany({ where: { budgetId: budget.id } })
+        }
+        
+        // Delete budgets and transactions
+        await tx.budget.deleteMany({ where: { createdBy: userId } })
+        await tx.transaction.deleteMany({ where: { userId } })
+        
+        // Delete projects and votes
+        const projects = await tx.project.findMany({ where: { createdBy: userId } })
+        for (const project of projects) {
+          await tx.vote.deleteMany({ where: { projectId: project.id } })
+        }
+        await tx.project.deleteMany({ where: { createdBy: userId } })
+        await tx.vote.deleteMany({ where: { userId } })
+        
+        // Delete reports and remittances
+        await tx.report.deleteMany({ where: { createdBy: userId } })
+        await tx.remittance.deleteMany({ where: { userId } })
+        
+        // Finally delete the user
+        await tx.user.delete({ where: { id: userId } })
+      })
+      return NextResponse.json({ message: 'User rejected and deleted' })
+    } catch (error: any) {
+      return NextResponse.json({ error: error.message || 'Failed to reject user' }, { status: 500 })
+    }
+  }
+
+  return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
+}

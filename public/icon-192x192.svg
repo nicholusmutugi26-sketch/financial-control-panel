@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <!-- Background -->
+  <rect width="192" height="192" fill="#1e40af"/>
+  
+  <!-- Rounded corners effect -->
+  <rect width="192" height="192" rx="45" fill="#1e40af"/>
+  
+  <!-- Outer circle -->
+  <circle cx="96" cy="96" r="85" fill="none" stroke="#ffffff" stroke-width="2"/>
+  
+  <!-- Dollar sign -->
+  <g transform="translate(96, 96)">
+    <!-- Vertical line -->
+    <line x1="0" y1="-35" x2="0" y2="35" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+    
+    <!-- Top curve -->
+    <path d="M -25 -20 Q -25 -35, 0 -35 Q 25 -35, 25 -20 Q 25 -10, 0 -5" 
+          fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- Bottom curve -->
+    <path d="M 25 20 Q 25 35, 0 35 Q -25 35, -25 20 Q -25 10, 0 5" 
+          fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  
+  <!-- Decorative elements -->
+  <circle cx="30" cy="30" r="8" fill="#60a5fa" opacity="0.8"/>
+  <circle cx="162" cy="162" r="8" fill="#60a5fa" opacity="0.8"/>
+</svg>

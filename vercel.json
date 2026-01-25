@@ -1,0 +1,31 @@
+{
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "outputDirectory": ".next",
+  "regions": ["iad1"],
+  "env": {
+    "NEXTAUTH_URL": "@nextauth_url",
+    "NEXTAUTH_SECRET": "@nextauth_secret",
+    "DATABASE_URL": "@database_url",
+    "NEXT_PUBLIC_SUPABASE_URL": "@next_public_supabase_url",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@next_public_supabase_anon_key",
+    "SUPABASE_SERVICE_ROLE_KEY": "@supabase_service_role_key",
+    "MPESA_CONSUMER_KEY": "@mpesa_consumer_key",
+    "MPESA_CONSUMER_SECRET": "@mpesa_consumer_secret",
+    "MPESA_PASSKEY": "@mpesa_passkey",
+    "MPESA_SHORTCODE": "@mpesa_shortcode",
+    "MPESA_CALLBACK_URL": "@mpesa_callback_url",
+    "UPLOADTHING_SECRET": "@uploadthing_secret",
+    "UPLOADTHING_APP_ID": "@uploadthing_app_id",
+    "APP_URL": "@app_url",
+    "JWT_SECRET": "@jwt_secret",
+    "NEXT_PUBLIC_SOCKET_URL": "@next_public_socket_url"
+  },
+  "git": {
+    "deploymentEnabled": {
+      "main": true
+    }
+  }
+}

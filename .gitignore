@@ -1,0 +1,85 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.production
+
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Testing
+/coverage
+/.vitest
+
+# Next.js
+/.next/
+/out/
+.next
+
+# Production
+/build
+/dist
+
+# Misc
+.DS_Store
+*.pem
+*.log
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.iml
+.gradle/
+.classpath
+.project
+.settings/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Build outputs
+dist/
+build/
+.turbo/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Public uploads (keep directory but ignore files)
+public/uploads/
+public/reports/
+
+# Worktrees
+fcp/
+fcp.worktrees/
+
+# Node
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Local deployment
+.vercel
+.netlify
+
+# Secrets and sensitive files
+.env.*.secret
+secrets.json
+
+# Temporary files
+tmp/
+temp/

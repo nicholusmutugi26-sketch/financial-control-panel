@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="120" fill="#1e40af"/>
+  
+  <!-- Outer circle -->
+  <circle cx="256" cy="256" r="226" fill="none" stroke="#ffffff" stroke-width="6"/>
+  
+  <!-- Dollar sign -->
+  <g transform="translate(256, 256)">
+    <!-- Vertical line -->
+    <line x1="0" y1="-94" x2="0" y2="94" stroke="#ffffff" stroke-width="16" stroke-linecap="round"/>
+    
+    <!-- Top curve -->
+    <path d="M -67 -54 Q -67 -94, 0 -94 Q 67 -94, 67 -54 Q 67 -27, 0 -13" 
+          fill="none" stroke="#ffffff" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- Bottom curve -->
+    <path d="M 67 54 Q 67 94, 0 94 Q -67 94, -67 54 Q -67 27, 0 13" 
+          fill="none" stroke="#ffffff" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  
+  <!-- Decorative elements -->
+  <circle cx="80" cy="80" r="20" fill="#60a5fa" opacity="0.8"/>
+  <circle cx="432" cy="432" r="20" fill="#60a5fa" opacity="0.8"/>
+</svg>
