@@ -80,6 +80,22 @@ export const authOptions: NextAuthOptions = {
         token.isApproved = (user as any).isApproved
         // include image when present on initial sign-in
         if ((user as any).image) token.image = (user as any).image
+      } else if (token.id) {
+        // On every token refresh, fetch the latest data from DB
+        try {
+          const dbUser = await prisma.user.findUnique({ where: { id: token.id as string } })
+          if (dbUser) {
+            token.role = (dbUser.role || 'USER') as "ADMIN" | "USER"
+            token.isApproved = dbUser.isApproved
+            console.log('JWT callback - Refreshed from DB:', {
+              userId: token.id,
+              dbRole: dbUser.role,
+              tokenRole: token.role,
+            })
+          }
+        } catch (e) {
+          console.error('JWT callback error:', e)
+        }
       }
       return token
     },
@@ -95,8 +111,15 @@ export const authOptions: NextAuthOptions = {
             session.user.role = (dbUser.role || 'USER') as "ADMIN" | "USER"
             ;(session.user as any).isApproved = dbUser.isApproved
             session.user.image = dbUser.profileImage || (token as any).image || null
+            console.log('Session callback - Updated from DB:', {
+              userId: token.id,
+              email: session.user.email,
+              dbRole: dbUser.role,
+              sessionRole: session.user.role,
+            })
           }
         } catch (e) {
+          console.error('Session callback error:', e)
           session.user.image = (token as any).image || null
         }
       }
