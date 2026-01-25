@@ -15,8 +15,8 @@ export default withAuth(
     const token = req.nextauth.token
     const path = req.nextUrl.pathname
 
-    // Check if user is approved (unless going to pending approval page)
-    if (!path.includes('/pending-approval') && token?.isApproved === false) {
+    // Check if user is approved (unless going to pending approval page or is admin)
+    if (!path.includes('/pending-approval') && token?.role !== 'ADMIN' && token?.isApproved === false) {
       return NextResponse.redirect(new URL('/dashboard/pending-approval', req.url))
     }
 
