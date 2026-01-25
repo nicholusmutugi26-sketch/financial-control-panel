@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import fs from 'fs'
-import path from 'path'
 import { PDFDocument as PDFLibDocument, StandardFonts, rgb } from 'pdf-lib'
 import { z } from 'zod'
 import { generateReportPeriod, getReportDateRange } from '@/lib/utils'
@@ -271,9 +269,6 @@ export async function POST(request: NextRequest) {
 
     // Build report PDF and persist Report record
     const reportId = `report-${Date.now()}`
-    const reportsDir = path.join(process.cwd(), 'public', 'reports')
-    if (!fs.existsSync(reportsDir)) fs.mkdirSync(reportsDir, { recursive: true })
-    const filePath = path.join(reportsDir, `${reportId}.pdf`)
     
     const pdfDoc = await PDFLibDocument.create()
     const helvetica = await pdfDoc.embedFont(StandardFonts.TimesRoman)
@@ -914,7 +909,10 @@ export async function POST(request: NextRequest) {
     })
 
     const pdfBytes = await pdfDoc.save()
-    fs.writeFileSync(filePath, pdfBytes)
+    
+    // Don't write to disk in production (Vercel serverless)
+    // Instead, store PDF bytes in database temporarily or return directly
+    // For now, we'll store the report metadata and stream PDF on download
 
     // Persist report record
     const persistedReport = await prisma.report.create({
@@ -922,7 +920,7 @@ export async function POST(request: NextRequest) {
         id: reportId,
         type: validatedData.type,
         period: reportData.period,
-        filePath: `/reports/${reportId}.pdf`,
+        filePath: `/api/reports/${reportId}/download`, // Store the API endpoint, not a file path
         createdBy: session.user.id,
       }
     })
