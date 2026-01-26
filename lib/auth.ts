@@ -119,12 +119,19 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string
-        session.user.role = token.role as "ADMIN" | "USER"
-        ;(session.user as any).isApproved = token.isApproved as boolean
         
-        // Refresh user data from database on each session to get latest role and approval status
+        // Always fetch latest role from database to prevent session stale state
         try {
-          const dbUser = await prisma.user.findUnique({ where: { id: token.id as string } })
+          const dbUser = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: { 
+              role: true, 
+              email: true, 
+              isApproved: true,
+              profileImage: true
+            }
+          })
+          
           if (dbUser) {
             // Enforce strict role assignment based on database
             let finalRole: "ADMIN" | "USER" = "USER"
@@ -133,20 +140,29 @@ export const authOptions: NextAuthOptions = {
             }
             
             session.user.role = finalRole
-            session.user.email = dbUser.email // Keep email fresh
+            session.user.email = dbUser.email
             ;(session.user as any).isApproved = dbUser.isApproved
             session.user.image = dbUser.profileImage || (token as any).image || null
-            console.log('Session callback - Updated from DB:', {
+            
+            console.log('Session callback - DB Refresh:', {
               userId: token.id,
               email: dbUser.email,
               dbRole: dbUser.role,
-              finalRole: finalRole,
+              assignedRole: finalRole,
               isApproved: dbUser.isApproved,
               timestamp: new Date().toISOString()
             })
+          } else {
+            // Fallback to token if user not found (shouldn't happen)
+            session.user.role = token.role as "ADMIN" | "USER"
+            ;(session.user as any).isApproved = token.isApproved as boolean
+            session.user.image = (token as any).image || null
           }
         } catch (e) {
-          console.error('Session callback error:', e)
+          console.error('Session callback error during DB refresh:', e)
+          // Fallback to token
+          session.user.role = token.role as "ADMIN" | "USER"
+          ;(session.user as any).isApproved = token.isApproved as boolean
           session.user.image = (token as any).image || null
         }
       }

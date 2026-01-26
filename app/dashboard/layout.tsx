@@ -15,6 +15,14 @@ export default async function DashboardLayout({
     redirect('/auth/login')
   }
 
+  console.log('DashboardLayout - Current session:', {
+    userId: session.user.id,
+    email: session.user.email,
+    role: session.user.role,
+    isApproved: (session.user as any).isApproved,
+    timestamp: new Date().toISOString()
+  })
+
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
     select: {
@@ -29,6 +37,13 @@ export default async function DashboardLayout({
   if (!user) {
     redirect('/auth/login')
   }
+
+  console.log('DashboardLayout - User from DB:', {
+    userId: user.id,
+    email: user.email,
+    role: user.role,
+    timestamp: new Date().toISOString()
+  })
 
   return (
     <div className="min-h-screen bg-gray-50">
