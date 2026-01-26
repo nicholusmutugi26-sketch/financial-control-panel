@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, Poppins } from 'next/font/google'
+import { Inter } from 'next/font/google'
 import './globals.css'
 import { Providers } from '@/components/providers/Providers'
 import { Toaster } from 'sonner'
@@ -7,12 +7,6 @@ import PWAScript from '@/components/PWAScript'
 
 const inter = Inter({ 
   subsets: ['latin'],
-  fallback: ['system-ui', 'arial', 'sans-serif']
-})
-const poppins = Poppins({ 
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800'],
-  variable: '--font-poppins',
   fallback: ['system-ui', 'arial', 'sans-serif']
 })
 
@@ -58,7 +52,7 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#1e40af" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
       </head>
-      <body className={`${inter.className} ${poppins.variable}`}>
+      <body className={inter.className}>
         <Providers>
           {children}
           <Toaster 
