@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { getIO } from '@/lib/realtime'
+import { getIO, safeEmitToSocket } from '@/lib/realtime'
 
 export type NotificationType = 'budget_approved' | 'budget_rejected' | 'expenditure_submitted' | 'expenditure_approved' | 'supplementary_requested' | 'supplementary_approved' | 'supplementary_rejected' | 'user_approved' | 'remittance_verified' | 'remittance_rejected' | 'project_started' | 'info'
 
@@ -22,7 +22,7 @@ export async function sendNotification({
   data
 }: NotificationPayload) {
   try {
-    // Create notification in database
+    // Create notification in database (always succeeds)
     const notification = await prisma.notification.create({
       data: {
         userId,
@@ -33,15 +33,24 @@ export async function sendNotification({
       }
     })
 
-    // Emit real-time notification via socket
-    getIO().to(`user-${userId}`).emit('notification', {
-      id: notification.id,
-      title,
-      message,
-      type,
-      data,
-      createdAt: notification.createdAt
-    })
+    // Attempt real-time notification via socket (graceful failure)
+    try {
+      const emitted = safeEmitToSocket(`user-${userId}`, 'notification', {
+        id: notification.id,
+        title,
+        message,
+        type,
+        data,
+        createdAt: notification.createdAt
+      })
+      
+      if (!emitted) {
+        console.log(`Notification saved to DB for user ${userId}, but real-time delivery not available`)
+      }
+    } catch (socketError) {
+      console.error('Socket.io error (non-fatal):', socketError)
+      // Continue - notification still saved to DB
+    }
 
     return notification
   } catch (error) {

@@ -4,26 +4,26 @@
 
 @layer base {
   :root {
-    /* Light theme with black box shadows */
+    /* Light theme with blue-violet accent and vibrant colors */
     --background: 0 0% 100%;
     --foreground: 0 0% 3.6%;
     --card: 0 0% 96.3%;
     --card-foreground: 0 0% 3.6%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 3.6%;
-    --primary: 262 80% 60%;
+    --primary: 249 89% 56%;
     --primary-foreground: 0 0% 100%;
     --secondary: 39 92% 55%;
     --secondary-foreground: 0 0% 100%;
     --muted: 0 0% 45.1%;
     --muted-foreground: 0 0% 39%;
-    --accent: 197 88% 58%;
+    --accent: 252 83% 62%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
     --border: 0 0% 89.8%;
     --input: 0 0% 96.3%;
-    --ring: 262 80% 60%;
+    --ring: 249 89% 56%;
     --radius: 0.5rem;
   }
 
@@ -35,19 +35,19 @@
     --card-foreground: 240 10% 95%;
     --popover: 240 10% 18%;
     --popover-foreground: 240 10% 95%;
-    --primary: 262 80% 60%;
+    --primary: 249 89% 56%;
     --primary-foreground: 240 10% 13%;
     --secondary: 39 92% 55%;
     --secondary-foreground: 240 10% 13%;
     --muted: 240 9% 30%;
     --muted-foreground: 240 8% 70%;
-    --accent: 197 88% 58%;
+    --accent: 252 83% 62%;
     --accent-foreground: 240 10% 13%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
     --border: 240 9% 25%;
     --input: 240 9% 22%;
-    --ring: 262 80% 60%;
+    --ring: 249 89% 56%;
   }
 }
 
@@ -91,7 +91,7 @@
 /* Navigation animated gradient for active nav items */
 @layer components {
   .nav-gradient {
-    background: linear-gradient(90deg, rgba(14,165,233,1) 0%, rgba(99,102,241,1) 50%, rgba(139,92,246,1) 100%);
+    background: linear-gradient(90deg, rgba(99,102,241,1) 0%, rgba(139,92,246,1) 50%, rgba(167,139,250,1) 100%);
     background-size: 200% 200%;
     animation: gradient-move 6s ease infinite;
     color: white;
@@ -119,7 +119,7 @@
 /* Auth page background and card float animation */
 @layer utilities {
   .auth-bg {
-    background: linear-gradient(135deg, rgba(14,165,233,0.08), rgba(99,102,241,0.06));
+    background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.06));
   }
 
   .card-float {

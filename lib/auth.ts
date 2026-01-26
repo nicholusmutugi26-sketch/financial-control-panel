@@ -100,12 +100,14 @@ export const authOptions: NextAuthOptions = {
             
             token.role = newRole
             token.isApproved = dbUser.isApproved
+            token.email = dbUser.email // Keep email fresh
             console.log('JWT callback - Token refresh:', {
               userId: token.id,
               email: dbUser.email,
               dbRole: dbUser.role,
               enforceRole: newRole,
               isApproved: dbUser.isApproved,
+              timestamp: new Date().toISOString()
             })
           }
         } catch (e) {
@@ -131,6 +133,7 @@ export const authOptions: NextAuthOptions = {
             }
             
             session.user.role = finalRole
+            session.user.email = dbUser.email // Keep email fresh
             ;(session.user as any).isApproved = dbUser.isApproved
             session.user.image = dbUser.profileImage || (token as any).image || null
             console.log('Session callback - Updated from DB:', {
@@ -139,6 +142,7 @@ export const authOptions: NextAuthOptions = {
               dbRole: dbUser.role,
               finalRole: finalRole,
               isApproved: dbUser.isApproved,
+              timestamp: new Date().toISOString()
             })
           }
         } catch (e) {

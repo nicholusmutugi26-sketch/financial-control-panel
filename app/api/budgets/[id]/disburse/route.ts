@@ -145,14 +145,17 @@ export async function POST(
 
     // Emit real-time notification (optional - socket may not be initialized)
     try {
-      getIO().to(`user-${budget.createdBy}`).emit('budget-disbursed', {
-        budgetId: id,
-        budgetTitle: budget.title,
-        amount: validatedData.amount,
-        method: validatedData.disbursementMethod,
-        newStatus: newStatus,
-        timestamp: new Date(),
-      })
+      const io = getIO()
+      if (io) {
+        io.to(`user-${budget.createdBy}`).emit('budget-disbursed', {
+          budgetId: id,
+          budgetTitle: budget.title,
+          amount: validatedData.amount,
+          method: validatedData.disbursementMethod,
+          newStatus: newStatus,
+          timestamp: new Date(),
+        })
+      }
     } catch (socketError) {
       console.log('Socket notification not sent (Socket.io not initialized)')
     }

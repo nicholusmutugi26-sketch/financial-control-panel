@@ -67,25 +67,25 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-emerald-50 via-blue-50 to-cyan-50 p-4 relative overflow-hidden">
+    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-violet-50 via-indigo-50 to-purple-50 p-4 relative overflow-hidden">
       {/* Animated background elements - bright and vibrant */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-emerald-400/30 to-cyan-400/20 rounded-full blur-3xl opacity-40 animate-pulse" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-blue-400/30 to-indigo-400/20 rounded-full blur-3xl opacity-40 animate-pulse" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-emerald-300/20 to-blue-300/20 rounded-full blur-3xl opacity-30" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-indigo-400/30 to-violet-400/20 rounded-full blur-3xl opacity-40 animate-pulse" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-purple-400/30 to-indigo-400/20 rounded-full blur-3xl opacity-40 animate-pulse" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-violet-300/20 to-indigo-300/20 rounded-full blur-3xl opacity-30" />
       </div>
 
       {/* Main content */}
       <div className="w-full max-w-md relative z-10">
         {/* Header with Sparkles */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 via-cyan-500 to-blue-500 shadow-2xl mb-4 animate-bounce">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-600 shadow-2xl mb-4 animate-bounce">
             <Lock className="w-7 h-7 text-white" />
           </div>
           <div className="flex items-center justify-center gap-2 mb-2">
-            <Sparkles className="w-5 h-5 text-emerald-500" />
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 via-cyan-600 to-blue-600 bg-clip-text text-transparent">Welcome Back</h1>
-            <Sparkles className="w-5 h-5 text-blue-500" />
+            <Sparkles className="w-5 h-5 text-indigo-600" />
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-700 via-violet-700 to-purple-700 bg-clip-text text-transparent">Welcome Back</h1>
+            <Sparkles className="w-5 h-5 text-purple-600" />
           </div>
           <p className="text-slate-600 text-sm font-medium">
             Your secure financial dashboard awaits
@@ -93,11 +93,11 @@ export default function LoginPage() {
         </div>
 
         {/* Login Card */}
-        <Card className="border-2 border-gradient-to-r from-emerald-200 to-blue-200 bg-white/95 backdrop-blur-2xl shadow-2xl hover:shadow-3xl transition-all duration-300">
-          <CardHeader className="space-y-2 pb-6 bg-gradient-to-r from-emerald-50/50 to-blue-50/50">
+        <Card className="border-2 border-gradient-to-r from-indigo-200 to-purple-200 bg-white/95 backdrop-blur-2xl shadow-2xl hover:shadow-3xl transition-all duration-300">
+          <CardHeader className="space-y-2 pb-6 bg-gradient-to-r from-indigo-50/50 to-purple-50/50">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-              <CardTitle className="text-2xl bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">Sign In</CardTitle>
+              <CheckCircle2 className="w-5 h-5 text-indigo-600" />
+              <CardTitle className="text-2xl bg-gradient-to-r from-indigo-700 to-purple-700 bg-clip-text text-transparent">Sign In</CardTitle>
             </div>
             <CardDescription className="text-slate-600 font-medium">
               Enter your credentials to access your account
@@ -116,13 +116,13 @@ export default function LoginPage() {
                       <FormLabel className="text-slate-700 font-semibold text-sm">Email Address</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-cyan-500 pointer-events-none" />
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-violet-600 pointer-events-none" />
                           <Input
                             type="email"
                             placeholder="you@example.com"
                             {...field}
                             disabled={isLoading}
-                            className="pl-10 bg-gradient-to-r from-emerald-50 to-blue-50 border-2 border-emerald-200 text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-300/50 transition-all h-11 font-medium"
+                            className="pl-10 bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-300 text-slate-900 placeholder:text-slate-400 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-300/50 transition-all h-11 font-medium"
                           />
                         </div>
                       </FormControl>
@@ -142,7 +142,7 @@ export default function LoginPage() {
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
+                          className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors"
                           disabled={isLoading}
                         >
                           {showPassword ? 'Hide' : 'Show'}
@@ -150,13 +150,13 @@ export default function LoginPage() {
                       </div>
                       <FormControl>
                         <div className="relative">
-                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-cyan-500 pointer-events-none" />
+                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-violet-600 pointer-events-none" />
                           <Input
                             type={showPassword ? 'text' : 'password'}
                             placeholder="••••••••"
                             {...field}
                             disabled={isLoading}
-                            className="pl-10 pr-10 bg-gradient-to-r from-emerald-50 to-blue-50 border-2 border-emerald-200 text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-300/50 transition-all h-11 font-medium"
+                            className="pl-10 pr-10 bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-300 text-slate-900 placeholder:text-slate-400 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-300/50 transition-all h-11 font-medium"
                           />
                           <button
                             type="button"
@@ -180,7 +180,7 @@ export default function LoginPage() {
                 {/* Submit Button */}
                 <Button 
                   type="submit" 
-                  className="w-full h-12 bg-gradient-to-r from-emerald-500 via-cyan-500 to-blue-500 hover:from-emerald-600 hover:via-cyan-600 hover:to-blue-600 text-white font-bold shadow-xl hover:shadow-2xl hover:shadow-cyan-400/40 transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed text-base"
+                  className="w-full h-12 bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-700 hover:via-violet-700 hover:to-purple-700 text-white font-bold shadow-xl hover:shadow-2xl hover:shadow-violet-400/40 transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed text-base"
                   disabled={isLoading}
                 >
                   <span className="flex items-center justify-center gap-2">
@@ -215,7 +215,7 @@ export default function LoginPage() {
                 <Link href="/auth/register" className="w-full inline-block">
                   <Button
                     type="button"
-                    className="w-full h-11 border-2 border-emerald-300 hover:border-emerald-400 bg-white hover:bg-emerald-50 text-emerald-600 hover:text-emerald-700 font-bold transition-all duration-200 text-base"
+                    className="w-full h-11 border-2 border-indigo-300 hover:border-indigo-500 bg-white hover:bg-indigo-50 text-indigo-700 hover:text-indigo-900 font-bold transition-all duration-200 text-base"
                   >
                     Create Account
                   </Button>
@@ -224,10 +224,10 @@ export default function LoginPage() {
             </Form>
 
             {/* Demo credentials */}
-            <div className="mt-6 p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200">
+            <div className="mt-6 p-3 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-300">
               <p className="text-xs font-semibold text-slate-700 mb-1">Demo Credentials:</p>
-              <p className="text-xs text-slate-600"><span className="font-mono bg-blue-100 px-2 py-1 rounded">admin@financialpanel.com</span></p>
-              <p className="text-xs text-slate-600"><span className="font-mono bg-blue-100 px-2 py-1 rounded">admin@financialpanel@2026</span></p>
+              <p className="text-xs text-slate-600"><span className="font-mono bg-indigo-100 px-2 py-1 rounded">admin@financialpanel.com</span></p>
+              <p className="text-xs text-slate-600"><span className="font-mono bg-indigo-100 px-2 py-1 rounded">admin@financialpanel@2026</span></p>
             </div>
           </CardContent>
         </Card>
@@ -235,7 +235,7 @@ export default function LoginPage() {
         {/* Trust indicators */}
         <div className="mt-8 grid grid-cols-3 gap-4 text-center">
           <div>
-            <div className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">🔒</div>
+            <div className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">🔒</div>
             <p className="text-xs text-slate-700 font-semibold mt-1">256-bit Encrypted</p>
           </div>
           <div>

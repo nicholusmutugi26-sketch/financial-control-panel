@@ -1,28 +1,35 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
-  <!-- Background -->
-  <rect width="192" height="192" fill="#1e40af"/>
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
   
-  <!-- Rounded corners effect -->
-  <rect width="192" height="192" rx="45" fill="#1e40af"/>
+  <!-- Background with gradient -->
+  <rect width="192" height="192" rx="45" fill="url(#bgGradient)"/>
   
-  <!-- Outer circle -->
-  <circle cx="96" cy="96" r="85" fill="none" stroke="#ffffff" stroke-width="2"/>
-  
-  <!-- Dollar sign -->
+  <!-- Finance Bag -->
   <g transform="translate(96, 96)">
-    <!-- Vertical line -->
-    <line x1="0" y1="-35" x2="0" y2="35" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+    <!-- Bag body -->
+    <path d="M -35 -15 L -35 25 Q -35 40 -15 40 L 15 40 Q 35 40 35 25 L 35 -15 Z" 
+          fill="#ffffff" stroke="#d8b4fe" stroke-width="2" stroke-linejoin="round"/>
     
-    <!-- Top curve -->
-    <path d="M -25 -20 Q -25 -35, 0 -35 Q 25 -35, 25 -20 Q 25 -10, 0 -5" 
-          fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Bag handle -->
+    <path d="M -15 -15 Q -15 -40 0 -40 Q 15 -40 15 -15" 
+          fill="none" stroke="#d8b4fe" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
     
-    <!-- Bottom curve -->
-    <path d="M 25 20 Q 25 35, 0 35 Q -25 35, -25 20 Q -25 10, 0 5" 
-          fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Dollar sign inside bag -->
+    <g transform="translate(0, 10)">
+      <line x1="0" y1="-12" x2="0" y2="12" stroke="url(#bgGradient)" stroke-width="3" stroke-linecap="round"/>
+      <path d="M -8 -8 Q -8 -13 0 -13 Q 8 -13 8 -8 Q 8 -3 0 0" 
+            fill="none" stroke="url(#bgGradient)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M 8 0 Q 8 5 0 5 Q -8 5 -8 0 Q -8 -3 0 3" 
+            fill="none" stroke="url(#bgGradient)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
   </g>
   
-  <!-- Decorative elements -->
-  <circle cx="30" cy="30" r="8" fill="#60a5fa" opacity="0.8"/>
-  <circle cx="162" cy="162" r="8" fill="#60a5fa" opacity="0.8"/>
+  <!-- Decorative accent circles -->
+  <circle cx="40" cy="40" r="12" fill="#c4b5fd" opacity="0.6"/>
+  <circle cx="152" cy="152" r="12" fill="#c4b5fd" opacity="0.6"/>
 </svg>

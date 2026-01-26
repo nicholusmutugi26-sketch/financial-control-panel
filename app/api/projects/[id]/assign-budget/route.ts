@@ -127,19 +127,22 @@ export async function POST(
 
     // Notify project creator and admins (wrapped in try-catch to handle socket.io issues gracefully)
     try {
-      getIO().to(`user-${project.createdBy}`).emit('budget-assigned', {
-        projectId: project.id,
-        budgetId: budget.id,
-        amount: budgetAmount,
-        message: `Budget of KES ${budgetAmount.toLocaleString()} has been allocated to your project`
-      })
+      const io = getIO()
+      if (io) {
+        io.to(`user-${project.createdBy}`).emit('budget-assigned', {
+          projectId: project.id,
+          budgetId: budget.id,
+          amount: budgetAmount,
+          message: `Budget of KES ${budgetAmount.toLocaleString()} has been allocated to your project`
+        })
 
-      // Notify all admins
-      getIO().to('admin-room').emit('fund-pool-updated', {
-        newBalance,
-        deductedAmount: budgetAmount,
-        projectId: project.id,
-      })
+        // Notify all admins
+        io.to('admin-room').emit('fund-pool-updated', {
+          newBalance,
+          deductedAmount: budgetAmount,
+          projectId: project.id,
+        })
+      }
     } catch (socketError) {
       // Socket.io not initialized or other socket error - log but don't fail the request
       console.warn('[ASSIGN_BUDGET_SOCKET_WARN]', socketError)

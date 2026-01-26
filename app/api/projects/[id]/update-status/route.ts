@@ -88,19 +88,22 @@ export async function POST(
 
     // Notify project creator and admins (wrapped in try-catch to handle socket.io issues gracefully)
     try {
-      getIO().to(`user-${project.createdBy}`).emit('project-updated', {
-        projectId: project.id,
-        status: newStatus,
-        progressPercentage: updatedProject.progressPercentage,
-        message: `Your project status has been updated to ${newStatus}`
-      })
+      const io = getIO()
+      if (io) {
+        io.to(`user-${project.createdBy}`).emit('project-updated', {
+          projectId: project.id,
+          status: newStatus,
+          progressPercentage: updatedProject.progressPercentage,
+          message: `Your project status has been updated to ${newStatus}`
+        })
 
-      // Notify all admins
-      getIO().to('admin-room').emit('project-updated', {
-        projectId: project.id,
-        status: newStatus,
-        progressPercentage: updatedProject.progressPercentage,
-      })
+        // Notify all admins
+        io.to('admin-room').emit('project-updated', {
+          projectId: project.id,
+          status: newStatus,
+          progressPercentage: updatedProject.progressPercentage,
+        })
+      }
     } catch (socketError) {
       // Socket.io not initialized or other socket error - log but don't fail the request
       console.warn('[UPDATE_STATUS_SOCKET_WARN]', socketError)

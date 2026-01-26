@@ -73,11 +73,14 @@ export async function POST(
 
       // Notify creator (wrapped in try-catch for socket.io)
       try {
-        getIO().to(`user-${project.createdBy}`).emit('project-updated', {
-          projectId: project.id,
-          status: 'VOTING',
-          message: 'Your project has been sent to voting'
-        })
+        const io = getIO()
+        if (io) {
+          io.to(`user-${project.createdBy}`).emit('project-updated', {
+            projectId: project.id,
+            status: 'VOTING',
+            message: 'Your project has been sent to voting'
+          })
+        }
       } catch (socketError) {
         console.warn('[APPROVE_SOCKET_WARN]', socketError)
       }
@@ -105,11 +108,14 @@ export async function POST(
 
       // Notify creator (wrapped in try-catch for socket.io)
       try {
-        getIO().to(`user-${project.createdBy}`).emit('project-updated', {
-          projectId: project.id,
-          status: 'APPROVED',
-          message: 'Your project has been approved'
-        })
+        const io = getIO()
+        if (io) {
+          io.to(`user-${project.createdBy}`).emit('project-updated', {
+            projectId: project.id,
+            status: 'APPROVED',
+            message: 'Your project has been approved'
+          })
+        }
       } catch (socketError) {
         console.warn('[APPROVE_SOCKET_WARN]', socketError)
       }
@@ -136,11 +142,14 @@ export async function POST(
 
       // Notify creator (wrapped in try-catch for socket.io)
       try {
-        getIO().to(`user-${project.createdBy}`).emit('project-updated', {
-          projectId: project.id,
-          status: 'REJECTED',
-          message: 'Your project has been rejected'
-        })
+        const io = getIO()
+        if (io) {
+          io.to(`user-${project.createdBy}`).emit('project-updated', {
+            projectId: project.id,
+            status: 'REJECTED',
+            message: 'Your project has been rejected'
+          })
+        }
       } catch (socketError) {
         console.warn('[APPROVE_SOCKET_WARN]', socketError)
       }

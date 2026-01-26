@@ -18,10 +18,39 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
       <QueryClientProvider client={queryClient}>
-        <SocketProvider>
-          {children}
-        </SocketProvider>
+        <ErrorBoundaryWrapper>
+          <SocketProvider>
+            {children}
+          </SocketProvider>
+        </ErrorBoundaryWrapper>
       </QueryClientProvider>
     </SessionProvider>
   )
+}
+
+/**
+ * Simple error boundary for Socket provider failures
+ * Ensures Socket.IO errors don't break the entire app
+ */
+function ErrorBoundaryWrapper({ children }: { children: React.ReactNode }) {
+  const [hasError, setHasError] = useState(false)
+
+  if (hasError) {
+    return (
+      <div style={{ padding: '20px', color: '#d32f2f' }}>
+        <p>Failed to initialize Socket.IO connection. This is optional and won't affect core functionality.</p>
+        <button onClick={() => setHasError(false)} style={{ marginTop: '10px', padding: '8px 16px' }}>
+          Retry
+        </button>
+      </div>
+    )
+  }
+
+  try {
+    return <>{children}</>
+  } catch (error) {
+    console.error('Error in SocketProvider:', error)
+    setHasError(true)
+    return null
+  }
 }
