@@ -397,7 +397,7 @@ function generateFinancialPerformance(
   const largeSupplementaryBudgets = approvedSupplementary
     .map((sb) => {
       const percentageIncrease = (sb.amount / (sb.budget?.amount || 1)) * 100
-      const riskLevel = percentageIncrease > 10 ? 'HIGH' : percentageIncrease > 5 ? 'MEDIUM' : 'LOW'
+      const riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' = percentageIncrease > 10 ? 'HIGH' : percentageIncrease > 5 ? 'MEDIUM' : 'LOW'
 
       return {
         budgetId: sb.budgetId,
