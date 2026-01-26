@@ -37,9 +37,17 @@ export default function PendingUsersApproval({ pendingUsers: initialUsers, onApp
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'approve' })
       })
-      const json = await res.json()
+      
+      let json: any = {}
+      try {
+        json = await res.json()
+      } catch (e) {
+        console.error('Failed to parse JSON response:', e)
+      }
 
-      if (!res.ok) throw new Error(json?.error || 'Failed to approve')
+      if (!res.ok) {
+        throw new Error(json?.error || `HTTP ${res.status}: Failed to approve`)
+      }
 
       // Remove user from local state immediately
       setUsers(users.filter(u => u.id !== userId))
@@ -51,6 +59,7 @@ export default function PendingUsersApproval({ pendingUsers: initialUsers, onApp
       setTimeout(() => router.refresh(), 500)
     } catch (err: any) {
       toast.error(err.message || 'Failed to approve user')
+      console.error('Approve error:', err)
     } finally {
       setLoading(null)
     }
@@ -66,9 +75,17 @@ export default function PendingUsersApproval({ pendingUsers: initialUsers, onApp
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'reject' })
       })
-      const json = await res.json()
+      
+      let json: any = {}
+      try {
+        json = await res.json()
+      } catch (e) {
+        console.error('Failed to parse JSON response:', e)
+      }
 
-      if (!res.ok) throw new Error(json?.error || 'Failed to reject')
+      if (!res.ok) {
+        throw new Error(json?.error || `HTTP ${res.status}: Failed to reject`)
+      }
       
       // Remove user from local state immediately
       setUsers(users.filter(u => u.id !== userId))
@@ -80,6 +97,7 @@ export default function PendingUsersApproval({ pendingUsers: initialUsers, onApp
       setTimeout(() => router.refresh(), 500)
     } catch (err: any) {
       toast.error(err.message || 'Failed to reject user')
+      console.error('Reject error:', err)
     } finally {
       setLoading(null)
     }

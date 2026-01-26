@@ -17,34 +17,61 @@ export async function POST(
   const { action } = await req.json()
 
   if (action === 'approve') {
-    const user = await prisma.user.update({
-      where: { id: params.id },
-      data: { isApproved: true }
-    })
-    
-    // Send approval notification to the user
     try {
-      await sendNotification({
-        userId: params.id,
-        title: 'Registration Approved',
-        message: 'Your registration has been approved! You can now access the system.',
-        type: 'user_approved',
-        data: { userId: params.id }
+      // Check if user exists before updating
+      const existingUser = await prisma.user.findUnique({
+        where: { id: params.id }
       })
-    } catch (error) {
-      console.error('Failed to send approval notification:', error)
+
+      if (!existingUser) {
+        return NextResponse.json({ error: 'User not found' }, { status: 404 })
+      }
+
+      const user = await prisma.user.update({
+        where: { id: params.id },
+        data: { isApproved: true }
+      })
+      
+      // Send approval notification to the user
+      try {
+        await sendNotification({
+          userId: params.id,
+          title: 'Registration Approved',
+          message: 'Your registration has been approved! You can now access the system.',
+          type: 'user_approved',
+          data: { userId: params.id }
+        })
+      } catch (error) {
+        console.error('Failed to send approval notification:', error)
+        // Don't fail the approval if notification fails
+      }
+      
+      return NextResponse.json({ success: true, message: 'User approved', user })
+    } catch (error: any) {
+      console.error('Approval error:', error)
+      return NextResponse.json({ error: error.message || 'Failed to approve user' }, { status: 500 })
     }
-    
-    return NextResponse.json({ message: 'User approved' })
   } else if (action === 'reject') {
     try {
-      await prisma.$transaction(async (tx) => {
-        const userId = params.id
+      const userId = params.id
+      
+      // First check if user exists
+      const userExists = await prisma.user.findUnique({
+        where: { id: userId }
+      })
 
+      if (!userExists) {
+        return NextResponse.json({ error: 'User not found' }, { status: 404 })
+      }
+
+      // Delete in a transaction
+      await prisma.$transaction(async (tx) => {
         // Delete all related records in the correct order to avoid foreign key conflicts
         await tx.auditLog.deleteMany({ where: { userId } })
         await tx.notification.deleteMany({ where: { userId } })
         await tx.userPreference.deleteMany({ where: { userId } })
+        
+        // Delete system settings updated by this user
         await tx.systemSetting.deleteMany({ where: { updatedBy: userId } })
         
         // Delete expenditure items and expenditures
@@ -81,12 +108,14 @@ export async function POST(
         await tx.report.deleteMany({ where: { createdBy: userId } })
         await tx.remittance.deleteMany({ where: { userId } })
         
-        // Finally delete the user
+        // Finally delete the user (this will cascade some deletes)
         await tx.user.delete({ where: { id: userId } })
       })
-      return NextResponse.json({ message: 'User rejected and deleted' })
+
+      return NextResponse.json({ success: true, message: 'User rejected and deleted' })
     } catch (error: any) {
-      return NextResponse.json({ error: error.message || 'Failed to reject user' }, { status: 500 })
+      console.error('Rejection error:', error)
+      return NextResponse.json({ error: error.message || 'Failed to reject user', details: error }, { status: 500 })
     }
   }
 
