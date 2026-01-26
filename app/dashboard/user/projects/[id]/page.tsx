@@ -17,7 +17,7 @@ export default async function UserProjectDetailPage({
 }) {
   const session = await getServerSession(authOptions)
   
-  if (!session) {
+  if (!session || session.user.role !== 'USER') {
     redirect('/auth/login')
   }
 

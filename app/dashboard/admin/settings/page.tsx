@@ -1,6 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -19,7 +21,19 @@ import {
 import { toast } from 'sonner'
 
 export default function AdminSettingsPage() {
+  const router = useRouter()
+  const { data: session, status } = useSession()
   const [isLoading, setIsLoading] = useState(false)
+  
+  // Protect page: Only admins can access settings
+  useEffect(() => {
+    if (status === 'loading') return // Wait for session to load
+    
+    if (!session || session.user?.role !== 'ADMIN') {
+      router.push('/dashboard')
+    }
+  }, [session, status, router])
+  
   const [settings, setSettings] = useState({
     siteName: 'Financial Control Panel',
     siteUrl: 'https://financialpanel.example.com',

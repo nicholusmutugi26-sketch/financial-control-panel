@@ -112,7 +112,7 @@ export default function LoginPage() {
                           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 pointer-events-none" />
                           <Input
                             type="email"
-                            placeholder="you@example.com"
+                            placeholder="Input Email"
                             {...field}
                             disabled={isLoading}
                             className="pl-10 bg-slate-700/50 border border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-colors h-10"
@@ -230,16 +230,7 @@ export default function LoginPage() {
           </CardContent>
         </Card>
 
-        {/* Demo info */}
-        <div className="mt-6 p-4 rounded-lg bg-slate-800/50 border border-slate-700/50 backdrop-blur">
-          <p className="text-xs text-slate-400 mb-2">
-            <span className="font-semibold text-slate-300">Demo Credentials:</span>
-          </p>
-          <p className="text-xs text-slate-500">
-            Email: admin@financialpanel.com<br />
-            Password: admin@financialpanel@2026
-          </p>
-        </div>
+       
       </div>
     </div>
   )

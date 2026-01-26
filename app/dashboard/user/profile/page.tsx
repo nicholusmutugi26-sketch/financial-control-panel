@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -29,11 +30,21 @@ const profileSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileSchema>
 
 export default function ProfilePage() {
-  const { data: session, update } = useSession()
+  const router = useRouter()
+  const { data: session, update, status } = useSession()
   const [isLoading, setIsLoading] = useState(false)
   const [profileImage, setProfileImage] = useState<string | null>(null)
   const [phoneNumber, setPhoneNumber] = useState<string>('')
   const [isLoadingProfile, setIsLoadingProfile] = useState(true)
+
+  // Protect page: Only users with USER role can access this page
+  useEffect(() => {
+    if (status === 'loading') return // Wait for session to load
+    
+    if (!session || session.user?.role !== 'USER') {
+      router.push('/dashboard')
+    }
+  }, [session, status, router])
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),

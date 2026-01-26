@@ -7,7 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default async function RemitPage() {
   const session = await getServerSession(authOptions)
-  if (!session) redirect('/auth/login')
+  
+  if (!session || session.user.role !== 'USER') {
+    redirect('/auth/login')
+  }
 
   const rems = await prisma.remittance.findMany({ where: { userId: session.user.id }, orderBy: { createdAt: 'desc' } })
 
