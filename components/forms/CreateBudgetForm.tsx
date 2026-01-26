@@ -123,7 +123,7 @@ export default function CreateBudgetForm() {
                     <FormLabel>Budget Title *</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="e.g., Monthly Office Supplies"
+                        placeholder="e.g., Monthly Food Supplies"
                         {...field}
                         disabled={isLoading}
                       />

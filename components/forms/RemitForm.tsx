@@ -47,7 +47,7 @@ export default function RemitForm() {
         <Input value={note} onChange={(e) => setNote(e.target.value)} />
       </div>
       <div>
-        <Label>Proof (URL)</Label>
+        <Label>Proof (eg Mpesa Message)</Label>
         <Input value={proof} onChange={(e) => setProof(e.target.value)} />
       </div>
       <Button onClick={submit} disabled={loading}>{loading ? 'Submitting...' : 'Submit Remittance'}</Button>

@@ -8,7 +8,7 @@ import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import Link from 'next/link'
-import { Eye, EyeOff, Lock, Mail, ArrowRight } from 'lucide-react'
+import { Eye, EyeOff, Lock, Mail, ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -67,37 +67,44 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4">
-      {/* Animated background elements */}
+    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-emerald-50 via-blue-50 to-cyan-50 p-4 relative overflow-hidden">
+      {/* Animated background elements - bright and vibrant */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl opacity-20 animate-pulse" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl opacity-20 animate-pulse" />
-        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl opacity-10" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-emerald-400/30 to-cyan-400/20 rounded-full blur-3xl opacity-40 animate-pulse" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-blue-400/30 to-indigo-400/20 rounded-full blur-3xl opacity-40 animate-pulse" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-emerald-300/20 to-blue-300/20 rounded-full blur-3xl opacity-30" />
       </div>
 
       {/* Main content */}
       <div className="w-full max-w-md relative z-10">
-        {/* Header */}
+        {/* Header with Sparkles */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg mb-4">
-            <Lock className="w-6 h-6 text-white" />
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 via-cyan-500 to-blue-500 shadow-2xl mb-4 animate-bounce">
+            <Lock className="w-7 h-7 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
-          <p className="text-slate-400 text-sm">
-            Access your Financial Control Panel
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <Sparkles className="w-5 h-5 text-emerald-500" />
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 via-cyan-600 to-blue-600 bg-clip-text text-transparent">Welcome Back</h1>
+            <Sparkles className="w-5 h-5 text-blue-500" />
+          </div>
+          <p className="text-slate-600 text-sm font-medium">
+            Your secure financial dashboard awaits
           </p>
         </div>
 
         {/* Login Card */}
-        <Card className="border border-slate-700/50 bg-slate-800/80 backdrop-blur-xl shadow-2xl">
-          <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-xl text-white">Sign In</CardTitle>
-            <CardDescription className="text-slate-400">
-              Enter your credentials to continue
+        <Card className="border-2 border-gradient-to-r from-emerald-200 to-blue-200 bg-white/95 backdrop-blur-2xl shadow-2xl hover:shadow-3xl transition-all duration-300">
+          <CardHeader className="space-y-2 pb-6 bg-gradient-to-r from-emerald-50/50 to-blue-50/50">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+              <CardTitle className="text-2xl bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">Sign In</CardTitle>
+            </div>
+            <CardDescription className="text-slate-600 font-medium">
+              Enter your credentials to access your account
             </CardDescription>
           </CardHeader>
 
-          <CardContent>
+          <CardContent className="pt-6">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
                 {/* Email Field */}
@@ -106,20 +113,20 @@ export default function LoginPage() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-slate-300 font-medium">Email Address</FormLabel>
+                      <FormLabel className="text-slate-700 font-semibold text-sm">Email Address</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 pointer-events-none" />
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-cyan-500 pointer-events-none" />
                           <Input
                             type="email"
-                            placeholder="Input Email"
+                            placeholder="you@example.com"
                             {...field}
                             disabled={isLoading}
-                            className="pl-10 bg-slate-700/50 border border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-colors h-10"
+                            className="pl-10 bg-gradient-to-r from-emerald-50 to-blue-50 border-2 border-emerald-200 text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-300/50 transition-all h-11 font-medium"
                           />
                         </div>
                       </FormControl>
-                      <FormMessage className="text-red-400 text-xs" />
+                      <FormMessage className="text-red-500 text-xs font-medium" />
                     </FormItem>
                   )}
                 />
@@ -131,11 +138,11 @@ export default function LoginPage() {
                   render={({ field }) => (
                     <FormItem>
                       <div className="flex items-center justify-between">
-                        <FormLabel className="text-slate-300 font-medium">Password</FormLabel>
+                        <FormLabel className="text-slate-700 font-semibold text-sm">Password</FormLabel>
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
+                          className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
                           disabled={isLoading}
                         >
                           {showPassword ? 'Hide' : 'Show'}
@@ -143,18 +150,18 @@ export default function LoginPage() {
                       </div>
                       <FormControl>
                         <div className="relative">
-                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 pointer-events-none" />
+                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-cyan-500 pointer-events-none" />
                           <Input
                             type={showPassword ? 'text' : 'password'}
                             placeholder="••••••••"
                             {...field}
                             disabled={isLoading}
-                            className="pl-10 pr-10 bg-slate-700/50 border border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-colors h-10"
+                            className="pl-10 pr-10 bg-gradient-to-r from-emerald-50 to-blue-50 border-2 border-emerald-200 text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-300/50 transition-all h-11 font-medium"
                           />
                           <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors disabled:cursor-not-allowed"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors disabled:cursor-not-allowed"
                             disabled={isLoading}
                           >
                             {showPassword ? (
@@ -165,7 +172,7 @@ export default function LoginPage() {
                           </button>
                         </div>
                       </FormControl>
-                      <FormMessage className="text-red-400 text-xs" />
+                      <FormMessage className="text-red-500 text-xs font-medium" />
                     </FormItem>
                   )}
                 />
@@ -173,13 +180,13 @@ export default function LoginPage() {
                 {/* Submit Button */}
                 <Button 
                   type="submit" 
-                  className="w-full h-10 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold shadow-lg hover:shadow-blue-500/50 transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full h-12 bg-gradient-to-r from-emerald-500 via-cyan-500 to-blue-500 hover:from-emerald-600 hover:via-cyan-600 hover:to-blue-600 text-white font-bold shadow-xl hover:shadow-2xl hover:shadow-cyan-400/40 transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed text-base"
                   disabled={isLoading}
                 >
                   <span className="flex items-center justify-center gap-2">
                     {isLoading ? (
                       <>
-                        <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                         </svg>
@@ -187,48 +194,59 @@ export default function LoginPage() {
                       </>
                     ) : (
                       <>
-                        Sign In
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        <span>Sign In Securely</span>
+                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                       </>
                     )}
                   </span>
                 </Button>
 
                 {/* Divider */}
-                <div className="relative my-2">
+                <div className="relative my-4">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-slate-700/50" />
+                    <div className="w-full border-t border-slate-300" />
                   </div>
                   <div className="relative flex justify-center text-xs">
-                    <span className="px-2 bg-slate-800/80 text-slate-500">New user?</span>
+                    <span className="px-3 bg-white text-slate-600 font-semibold">Don't have an account?</span>
                   </div>
                 </div>
 
                 {/* Sign Up Link */}
-                <Link
-                  href="/auth/register"
-                  className="w-full inline-block"
-                >
+                <Link href="/auth/register" className="w-full inline-block">
                   <Button
                     type="button"
-                    variant="outline"
-                    className="w-full h-10 border border-slate-600 hover:border-slate-500 bg-slate-700/30 hover:bg-slate-700/50 text-slate-300 hover:text-white transition-colors"
+                    className="w-full h-11 border-2 border-emerald-300 hover:border-emerald-400 bg-white hover:bg-emerald-50 text-emerald-600 hover:text-emerald-700 font-bold transition-all duration-200 text-base"
                   >
-                    Create an Account
+                    Create Account
                   </Button>
                 </Link>
               </form>
             </Form>
 
-            {/* Footer info */}
-            <p className="text-xs text-slate-500 text-center mt-6">
-              By signing in, you agree to our{' '}
-              <a href="#" className="text-blue-400 hover:text-blue-300 transition-colors">
-                Terms of Service
-              </a>
-            </p>
+            {/* Demo credentials */}
+            <div className="mt-6 p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200">
+              <p className="text-xs font-semibold text-slate-700 mb-1">Demo Credentials:</p>
+              <p className="text-xs text-slate-600"><span className="font-mono bg-blue-100 px-2 py-1 rounded">admin@financialpanel.com</span></p>
+              <p className="text-xs text-slate-600"><span className="font-mono bg-blue-100 px-2 py-1 rounded">admin@financialpanel@2026</span></p>
+            </div>
           </CardContent>
         </Card>
+
+        {/* Trust indicators */}
+        <div className="mt-8 grid grid-cols-3 gap-4 text-center">
+          <div>
+            <div className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">🔒</div>
+            <p className="text-xs text-slate-700 font-semibold mt-1">256-bit Encrypted</p>
+          </div>
+          <div>
+            <div className="text-2xl font-bold">✓</div>
+            <p className="text-xs text-slate-700 font-semibold mt-1">Secure & Fast</p>
+          </div>
+          <div>
+            <div className="text-2xl font-bold">⭐</div>
+            <p className="text-xs text-slate-700 font-semibold mt-1">Trusted by Many</p>
+          </div>
+        </div>
 
        
       </div>

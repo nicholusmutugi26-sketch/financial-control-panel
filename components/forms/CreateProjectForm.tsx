@@ -83,7 +83,7 @@ export default function CreateProjectForm() {
               <FormLabel className="text-base">Project Title *</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="e.g., Website Redesign 2024"
+                  placeholder="e.g., Chicken Rearing"
                   {...field}
                   disabled={isLoading}
                   className="h-10"
