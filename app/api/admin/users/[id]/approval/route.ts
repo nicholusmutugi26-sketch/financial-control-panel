@@ -18,21 +18,23 @@ export async function POST(
 
   if (action === 'approve') {
     try {
-      // Check if user exists before updating
-      const existingUser = await prisma.user.findUnique({
-        where: { id: params.id }
-      })
+      // Combine user check and approval in a single transaction to save connections
+      const user = await prisma.$transaction(async (tx) => {
+        const existingUser = await tx.user.findUnique({
+          where: { id: params.id }
+        })
 
-      if (!existingUser) {
-        return NextResponse.json({ error: 'User not found' }, { status: 404 })
-      }
+        if (!existingUser) {
+          throw new Error('User not found')
+        }
 
-      const user = await prisma.user.update({
-        where: { id: params.id },
-        data: { isApproved: true }
+        return await tx.user.update({
+          where: { id: params.id },
+          data: { isApproved: true }
+        })
       })
       
-      // Send approval notification to the user
+      // Send approval notification to the user (outside transaction)
       try {
         await sendNotification({
           userId: params.id,
@@ -49,7 +51,8 @@ export async function POST(
       return NextResponse.json({ success: true, message: 'User approved', user })
     } catch (error: any) {
       console.error('Approval error:', error)
-      return NextResponse.json({ error: error.message || 'Failed to approve user' }, { status: 500 })
+      const statusCode = error.message === 'User not found' ? 404 : 500
+      return NextResponse.json({ error: error.message || 'Failed to approve user' }, { status: statusCode })
     }
   } else if (action === 'reject') {
     try {
