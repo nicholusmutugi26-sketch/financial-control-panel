@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
 import { prisma } from '@/lib/prisma'
+import { utapi } from '@/lib/uploadthing'
 
 export const runtime = 'nodejs'
 
@@ -42,10 +41,28 @@ export async function POST(req: Request) {
     try {
       const user = await prisma.user.findUnique({
         where: { id: userId },
-        select: { id: true }
+        select: { id: true, profileImage: true }
       })
       userExists = !!user
       console.log('User verification:', { userId, exists: userExists })
+
+      // If user already has a profile image, delete it from UploadThing
+      if (user?.profileImage) {
+        try {
+          const oldUrl = user.profileImage
+          // Extract file key from URL if it's an UploadThing URL
+          if (oldUrl.includes('uploadthing')) {
+            const fileKey = oldUrl.split('/').pop()
+            if (fileKey) {
+              await utapi.deleteFiles(fileKey)
+              console.log('Old profile image deleted:', fileKey)
+            }
+          }
+        } catch (deleteError: any) {
+          console.warn('Failed to delete old profile image:', deleteError.message)
+          // Don't block upload if deletion fails
+        }
+      }
     } catch (dbError: any) {
       console.warn('Failed to verify user:', dbError.message)
       // Don't block upload if DB verification fails
@@ -56,61 +73,55 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: `User not found: ${userId}` }, { status: 404 })
     }
 
-    const arrayBuffer = await file.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
-
-    const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'profiles')
-    
-    // Create directory if it doesn't exist
     try {
-      await fs.promises.mkdir(uploadsDir, { recursive: true })
-      console.log('Upload directory ready:', uploadsDir)
-    } catch (dirError: any) {
-      console.error('Failed to create upload directory:', dirError.message)
-      return NextResponse.json({ error: 'Failed to create upload directory' }, { status: 500 })
-    }
-
-    // Generate safe filename
-    const timestamp = Date.now()
-    const ext = path.extname(file.name) || '.jpg'
-    const baseName = path.basename(file.name, ext).replace(/[^a-zA-Z0-9\-_]/g, '') || 'profile'
-    const safeName = `${baseName}-${timestamp}${ext}`
-    const filePath = path.join(uploadsDir, safeName)
-
-    console.log('Saving file:', { filePath, safeName })
-
-    // Write file to disk
-    try {
-      await fs.promises.writeFile(filePath, buffer)
-      console.log('File written successfully:', filePath)
-    } catch (writeError: any) {
-      console.error('Failed to write file:', writeError.message)
-      return NextResponse.json({ error: 'Failed to save file to disk' }, { status: 500 })
-    }
-
-    const url = `/uploads/profiles/${safeName}`
-
-    // Update database with new profile image URL
-    try {
-      console.log('Updating user profile image in DB:', { userId, url })
-      const updatedUser = await prisma.user.update({
-        where: { id: userId },
-        data: { profileImage: url },
-        select: { id: true, profileImage: true }
+      console.log('Uploading file to UploadThing...')
+      
+      // Upload to UploadThing
+      const result = await utapi.uploadFiles([file], {
+        metadata: {
+          userId,
+          uploadedAt: new Date().toISOString(),
+        },
       })
-      console.log('User profile updated successfully:', updatedUser)
-    } catch (dbUpdateError: any) {
-      console.error('Failed to update user profileImage in DB:', dbUpdateError.message)
-      // Still return the URL since file was saved successfully
-      // User can retry updating the DB later
-    }
 
-    console.log('Upload successful:', { url, userId })
-    return NextResponse.json({ 
-      success: true,
-      url,
-      message: 'Profile picture uploaded successfully'
-    })
+      if (!result || !result[0] || !result[0].data) {
+        console.error('UploadThing upload failed:', result?.[0]?.error)
+        return NextResponse.json({ error: 'Failed to upload file to cloud storage' }, { status: 500 })
+      }
+
+      const uploadedFile = result[0].data
+      const url = uploadedFile.url
+
+      console.log('File uploaded to UploadThing:', { url, fileKey: uploadedFile.key })
+
+      // Update database with new profile image URL
+      try {
+        console.log('Updating user profile image in DB:', { userId, url })
+        const updatedUser = await prisma.user.update({
+          where: { id: userId },
+          data: { profileImage: url },
+          select: { id: true, profileImage: true }
+        })
+        console.log('User profile updated successfully:', updatedUser)
+      } catch (dbUpdateError: any) {
+        console.error('Failed to update user profileImage in DB:', dbUpdateError.message)
+        // Still return the URL since file was uploaded successfully to UploadThing
+        // User can retry updating the DB later
+      }
+
+      console.log('Upload successful:', { url, userId })
+      return NextResponse.json({ 
+        success: true,
+        url,
+        message: 'Profile picture uploaded successfully'
+      })
+    } catch (uploadError: any) {
+      console.error('UploadThing upload failed:', uploadError)
+      return NextResponse.json({ 
+        error: 'Failed to upload file to cloud storage',
+        details: process.env.NODE_ENV === 'development' ? uploadError.message : undefined
+      }, { status: 500 })
+    }
   } catch (err: any) {
     console.error('Upload error:', err)
     return NextResponse.json({ 
