@@ -124,7 +124,7 @@ export default function RegisterPage() {
           </div>
           
           <h1 className="welcome-header text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">Create Account</h1>
-          <p className="text-sm sm:text-base text-gray-600">Join us and start managing finances today</p>
+          <p className="text-sm sm:text-base text-gray-600">Start managing finances today</p>
         </div>
 
         {/* Register Card */}
@@ -149,7 +149,7 @@ export default function RegisterPage() {
                           <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400 pointer-events-none" />
                           <Input
                             {...field}
-                            placeholder="John Doe"
+                            placeholder="Full Name"
                             disabled={isLoading}
                             className="input-animated pl-9 sm:pl-10 h-9 sm:h-10 text-xs sm:text-sm rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                           />
@@ -173,7 +173,7 @@ export default function RegisterPage() {
                           <Input
                             {...field}
                             type="email"
-                            placeholder="you@example.com"
+                            placeholder="Input Your Email"
                             disabled={isLoading}
                             className="input-animated pl-9 sm:pl-10 h-9 sm:h-10 text-xs sm:text-sm rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                           />
@@ -196,7 +196,7 @@ export default function RegisterPage() {
                           <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400 pointer-events-none" />
                           <Input
                             {...field}
-                            placeholder="254712345678"
+                            placeholder="2547........"
                             disabled={isLoading}
                             className="input-animated pl-9 sm:pl-10 h-9 sm:h-10 text-xs sm:text-sm rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                           />
@@ -305,7 +305,7 @@ export default function RegisterPage() {
 
         {/* Footer note */}
         <div className="mt-6 sm:mt-8 text-center text-xs sm:text-sm text-gray-500 fade-in-cascade">
-          <p>Secure registration • Your data is encrypted</p>
+          <p>Secure registration • </p>
         </div>
       </div>
     </div>

@@ -116,7 +116,7 @@ export default function LoginPage() {
                           <Input
                             {...field}
                             type="email"
-                            placeholder="you@example.com"
+                            placeholder="Input Your Email"
                             disabled={isLoading}
                             className="input-animated pl-9 sm:pl-10 h-9 sm:h-10 text-xs sm:text-sm rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                           />

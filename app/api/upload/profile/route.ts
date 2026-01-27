@@ -1,12 +1,21 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { utapi } from '@/lib/uploadthing'
+import { utapi, isUploadThingAvailable } from '@/lib/uploadthing'
 
 export const runtime = 'nodejs'
 
 export async function POST(req: Request) {
   try {
     console.log('Profile upload initiated...')
+
+    // Check if UploadThing is configured
+    if (!isUploadThingAvailable()) {
+      console.error('UploadThing not configured - missing UPLOADTHING_SECRET')
+      return NextResponse.json({
+        error: 'File upload service not configured. Please contact administrator.',
+        details: 'UPLOADTHING_SECRET environment variable is missing or invalid'
+      }, { status: 503 })
+    }
     
     const form = await req.formData()
     const file = form.get('file') as File | null
@@ -54,7 +63,7 @@ export async function POST(req: Request) {
           if (oldUrl.includes('uploadthing')) {
             const fileKey = oldUrl.split('/').pop()
             if (fileKey) {
-              await utapi.deleteFiles(fileKey)
+              await utapi!.deleteFiles(fileKey)
               console.log('Old profile image deleted:', fileKey)
             }
           }
@@ -77,7 +86,7 @@ export async function POST(req: Request) {
       console.log('Uploading file to UploadThing...')
       
       // Upload to UploadThing
-      const result = await utapi.uploadFiles([file], {
+      const result = await utapi!.uploadFiles([file], {
         metadata: {
           userId,
           uploadedAt: new Date().toISOString(),
