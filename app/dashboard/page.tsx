@@ -4,37 +4,59 @@ import { redirect } from 'next/navigation'
 
 /**
  * Root dashboard page - handles role-based redirection
- * NOTE: Auth redirect callback now handles most of the redirection,
- * but we keep this as a fallback for direct /dashboard access
+ * CRITICAL: This is a security checkpoint - validate role and redirect
  */
 export default async function DashboardRootPage() {
   const session = await getServerSession(authOptions)
 
   if (!session) {
+    console.warn('[DASHBOARD] No session found, redirecting to login')
     redirect('/auth/login')
   }
 
-  console.log('DashboardRootPage - Handling redirect:', {
-    userId: session.user.id,
-    email: session.user.email,
-    role: session.user.role,
-    isApproved: (session.user as any).isApproved,
+  // Normalize and validate role
+  const userRole = String(session.user?.role || '').toUpperCase().trim()
+  const isAdmin = userRole === 'ADMIN'
+  const isUser = userRole === 'USER'
+
+  console.log('[DASHBOARD] Root page - Role check:', {
+    userId: session.user?.id,
+    email: session.user?.email,
+    tokenRole: session.user?.role,
+    normalizedRole: userRole,
+    isAdmin,
+    isUser,
+    isApproved: (session.user as any)?.isApproved,
     timestamp: new Date().toISOString()
   })
 
+  // SAFETY: If role is unrecognized, redirect to login
+  if (!isAdmin && !isUser) {
+    console.error('[DASHBOARD] SECURITY: Unrecognized role detected!', {
+      role: session.user?.role,
+      email: session.user?.email
+    })
+    redirect('/auth/login')
+  }
+
   // Check approval status first - redirect if not approved (unless admin)
-  if (session.user.role !== 'ADMIN' && !(session.user as any).isApproved) {
-    console.log('DashboardRootPage - User not approved, redirecting to pending-approval')
+  if (!isAdmin && !(session.user as any)?.isApproved) {
+    console.log('[DASHBOARD] User not approved, redirecting to pending-approval')
     redirect('/dashboard/pending-approval')
   }
 
-  // Redirect based on role
-  // This is a fallback - auth redirect callback should handle this on initial login
-  if (session.user.role === 'ADMIN') {
-    console.log('DashboardRootPage - Admin detected, redirecting to /dashboard/admin/dashboard')
+  // CRITICAL ENFORCEMENT: Redirect based on role
+  if (isAdmin) {
+    console.log('[DASHBOARD] Admin role detected, redirecting to /dashboard/admin/dashboard')
     redirect('/dashboard/admin/dashboard')
   }
 
-  console.log('DashboardRootPage - User detected, redirecting to /dashboard/user/dashboard')
-  redirect('/dashboard/user/dashboard')
+  if (isUser) {
+    console.log('[DASHBOARD] User role detected, redirecting to /dashboard/user/dashboard')
+    redirect('/dashboard/user/dashboard')
+  }
+
+  // Fallback - should never reach here
+  console.error('[DASHBOARD] CRITICAL: Reached fallback redirect (should not happen)')
+  redirect('/auth/login')
 }
