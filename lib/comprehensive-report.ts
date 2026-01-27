@@ -394,7 +394,7 @@ function generateFinancialPerformance(
 
   // Supplementary Budget Analysis
   const approvedSupplementary = supplementaryBudgets.filter((sb) => sb.status === 'APPROVED')
-  const largeSupplementaryBudgets = approvedSupplementary
+  const largeSupplementaryBudgets: SupplementaryBudgetAnalysis['largeSupplementaryBudgets'] = approvedSupplementary
     .map((sb) => {
       const percentageIncrease = (sb.amount / (sb.budget?.amount || 1)) * 100
       const riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' = percentageIncrease > 10 ? 'HIGH' : percentageIncrease > 5 ? 'MEDIUM' : 'LOW'
