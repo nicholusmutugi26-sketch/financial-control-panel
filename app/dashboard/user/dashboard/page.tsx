@@ -130,21 +130,21 @@ export default async function UserDashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-gray-600">
-            Welcome back!.
+    <div className="space-y-4 sm:space-y-6 page-enter">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0">
+        <div className="flex-1">
+          <h1 className="welcome-header text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">Dashboard</h1>
+          <p className="text-gray-600 text-sm sm:text-base mt-1 sm:mt-2 fade-in-cascade">
+            Welcome back! Here's your financial overview.
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button asChild>
+        <div className="flex gap-2 w-full sm:w-auto fade-in-cascade">
+          <Button asChild className="flex-1 sm:flex-none">
             <Link href="/dashboard/user/budgets/new">
               New Budget
             </Link>
           </Button>
-          <Button variant="outline" asChild>
+          <Button variant="outline" asChild className="flex-1 sm:flex-none">
             <Link href="/dashboard/user/expenditures/new">
               New Expenditure
             </Link>

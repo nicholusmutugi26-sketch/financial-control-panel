@@ -1,13 +1,15 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
+import { Poppins } from 'next/font/google'
 import './globals.css'
 import { Providers } from '@/components/providers/Providers'
 import { Toaster } from 'sonner'
 import PWAScript from '@/components/PWAScript'
 
-const inter = Inter({ 
+const poppins = Poppins({
+  weight: ['400', '500', '600', '700', '800'],
   subsets: ['latin'],
-  fallback: ['system-ui', 'arial', 'sans-serif']
+  fallback: ['system-ui', 'arial', 'sans-serif'],
+  variable: '--font-poppins'
 })
 
 export const metadata: Metadata = {
@@ -52,7 +54,7 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#7c3aed" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
       </head>
-      <body className={inter.className}>
+      <body className={`${poppins.className} antialiased`}>
         <Providers>
           {children}
           <Toaster 

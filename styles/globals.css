@@ -237,6 +237,107 @@
   .space-comfortable {
     @apply space-y-4 sm:space-y-5;
   }
+
+  /* Heading animations */
+  .heading-gradient {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6, #06b6d4);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradient-shift 8s ease infinite;
+  }
+
+  @keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* Welcome back header animation */
+  .welcome-header {
+    animation: welcome-bounce 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 1;
+  }
+
+  @keyframes welcome-bounce {
+    0% { opacity: 0; transform: translateY(-20px); }
+    50% { transform: translateY(4px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Fade in cascade for multiple elements */
+  .fade-in-cascade {
+    animation: fade-in-cascade 600ms ease-out forwards;
+  }
+
+  @keyframes fade-in-cascade {
+    0% { opacity: 0; transform: translateY(12px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-in-cascade:nth-child(1) { animation-delay: 100ms; }
+  .fade-in-cascade:nth-child(2) { animation-delay: 200ms; }
+  .fade-in-cascade:nth-child(3) { animation-delay: 300ms; }
+  .fade-in-cascade:nth-child(4) { animation-delay: 400ms; }
+  .fade-in-cascade:nth-child(5) { animation-delay: 500ms; }
+
+  /* Responsive width transitions */
+  .responsive-container {
+    transition: max-width 400ms cubic-bezier(0.2, 0.9, 0.2, 1);
+  }
+
+  @media (min-width: 640px) {
+    .responsive-container {
+      max-width: 640px;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .responsive-container {
+      max-width: 750px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .responsive-container {
+      max-width: 900px;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .responsive-container {
+      max-width: 1100px;
+    }
+  }
+
+  /* Input animation on focus */
+  .input-animated {
+    transition: all 200ms cubic-bezier(0.2, 0.9, 0.2, 1);
+  }
+
+  .input-animated:focus {
+    transform: scale(1.02) translateY(-2px);
+  }
+
+  /* Pulse animation for notifications */
+  .pulse-soft {
+    animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse-soft {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 1; }
+  }
+
+  /* Smooth page transitions */
+  .page-enter {
+    animation: page-enter 300ms ease-out;
+  }
+
+  @keyframes page-enter {
+    0% { opacity: 0; transform: translateY(8px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
 }
 
 

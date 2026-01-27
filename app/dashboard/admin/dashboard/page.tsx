@@ -154,11 +154,11 @@ export default async function AdminDashboardPage() {
   const computedAvailable = poolBalance - (adminStats.totalBudget || 0)
 
   return (
-    <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-            <p className="text-gray-600">Overview of the finance flow control panel</p>
+    <div className="space-y-4 sm:space-y-6 page-enter">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+          <div className="flex-1">
+            <h1 className="welcome-header text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">Admin Dashboard</h1>
+            <p className="text-gray-600 text-sm sm:text-base mt-1 sm:mt-2 fade-in-cascade">Overview of the finance flow control panel</p>
           </div>
         </div>
 

@@ -101,57 +101,61 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-gray-50 via-blue-50 to-slate-50 p-4 relative overflow-hidden">
-      {/* Animated background elements - professional and subtle */}
+    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 via-blue-50 to-slate-50 p-3 sm:p-4 md:p-6 relative overflow-hidden">
+      {/* Animated background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-300/10 to-slate-300/5 rounded-full blur-3xl opacity-40 animate-pulse" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-blue-300/10 to-gray-300/5 rounded-full blur-3xl opacity-40 animate-pulse" />
+        <div className="absolute top-0 right-0 w-72 sm:w-96 h-72 sm:h-96 bg-gradient-to-br from-blue-300/10 to-slate-300/5 rounded-full blur-3xl opacity-40 animate-pulse" />
+        <div className="absolute bottom-0 left-0 w-72 sm:w-96 h-72 sm:h-96 bg-gradient-to-tr from-blue-300/10 to-gray-300/5 rounded-full blur-3xl opacity-40 animate-pulse" />
       </div>
 
-      {/* Main content */}
-      <div className="w-full max-w-md relative z-10">
+      {/* Main content with responsive width */}
+      <div className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg relative z-10 responsive-container mx-auto px-2 sm:px-0">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 shadow-lg mb-4">
-            <User className="w-7 h-7 text-white" />
+        <div className="text-center mb-6 sm:mb-8 md:mb-10 fade-in-cascade">
+          {/* Logo */}
+          <div className="flex items-center justify-center gap-2 mb-3 sm:mb-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-br from-blue-500 via-blue-600 to-violet-600 flex items-center justify-center shadow-lg">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4z" />
+                <path fillRule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zm11-4a1 1 0 10-2 0 1 1 0 002 0z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <span className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 via-blue-500 to-violet-600 bg-clip-text text-transparent">Financial Panel</span>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Get Started</h1>
-          <p className="text-gray-600 text-sm font-medium">
-            Create your financial account
-          </p>
+          
+          <h1 className="welcome-header text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">Create Account</h1>
+          <p className="text-sm sm:text-base text-gray-600">Join us and start managing finances today</p>
         </div>
 
         {/* Register Card */}
-        <Card className="border border-gray-200 bg-white shadow-lg hover:shadow-xl transition-shadow duration-300">
-          <CardHeader className="pb-6 border-b border-gray-100">
-            <CardTitle className="text-2xl text-gray-900">Create Account</CardTitle>
-            <CardDescription className="text-gray-600">
-              Set up your account in a few minutes
-            </CardDescription>
+        <Card className="fade-in-cascade border-blue-200/50 shadow-lg hover:shadow-xl transition-shadow duration-300 backdrop-blur-sm bg-white/95">
+          <CardHeader className="pb-3 sm:pb-4 space-y-1 sm:space-y-2">
+            <CardTitle className="text-xl sm:text-2xl text-gray-900">Sign up</CardTitle>
+            <CardDescription className="text-xs sm:text-sm text-gray-600">Fill in your details to create a new account</CardDescription>
           </CardHeader>
-
-          <CardContent className="pt-6">
+          
+          <CardContent className="space-y-3 sm:space-y-4">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
                 {/* Name Field */}
                 <FormField
                   control={form.control}
                   name="name"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-gray-700 font-semibold text-sm">Full Name</FormLabel>
+                    <FormItem className="fade-in-cascade">
+                      <FormLabel className="text-xs sm:text-sm font-medium text-gray-700">Full Name</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-500 pointer-events-none" />
+                          <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400 pointer-events-none" />
                           <Input
-                            placeholder="Full Name"
                             {...field}
+                            placeholder="John Doe"
                             disabled={isLoading}
-                            className="pl-10 bg-white border border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all h-11"
+                            className="input-animated pl-9 sm:pl-10 h-9 sm:h-10 text-xs sm:text-sm rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                           />
                         </div>
                       </FormControl>
-                      <FormMessage className="text-red-500 text-xs font-medium" />
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
@@ -161,21 +165,21 @@ export default function RegisterPage() {
                   control={form.control}
                   name="email"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-gray-700 font-semibold text-sm">Email Address</FormLabel>
+                    <FormItem className="fade-in-cascade">
+                      <FormLabel className="text-xs sm:text-sm font-medium text-gray-700">Email</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-500 pointer-events-none" />
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400 pointer-events-none" />
                           <Input
-                            type="email"
-                            placeholder="input email"
                             {...field}
+                            type="email"
+                            placeholder="you@example.com"
                             disabled={isLoading}
-                            className="pl-10 bg-white border border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all h-11"
+                            className="input-animated pl-9 sm:pl-10 h-9 sm:h-10 text-xs sm:text-sm rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                           />
                         </div>
                       </FormControl>
-                      <FormMessage className="text-red-500 text-xs font-medium" />
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
@@ -185,20 +189,20 @@ export default function RegisterPage() {
                   control={form.control}
                   name="phoneNumber"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-gray-700 font-semibold text-sm">Phone Number</FormLabel>
+                    <FormItem className="fade-in-cascade">
+                      <FormLabel className="text-xs sm:text-sm font-medium text-gray-700">Phone Number</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-500 pointer-events-none" />
+                          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400 pointer-events-none" />
                           <Input
-                            placeholder="2547........"
                             {...field}
+                            placeholder="254712345678"
                             disabled={isLoading}
-                            className="pl-10 bg-white border border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all h-11"
+                            className="input-animated pl-9 sm:pl-10 h-9 sm:h-10 text-xs sm:text-sm rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                           />
                         </div>
                       </FormControl>
-                      <FormMessage className="text-red-500 text-xs font-medium" />
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
@@ -208,43 +212,33 @@ export default function RegisterPage() {
                   control={form.control}
                   name="password"
                   render={({ field }) => (
-                    <FormItem>
-                      <div className="flex items-center justify-between">
-                        <FormLabel className="text-gray-700 font-semibold text-sm">Password</FormLabel>
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors"
-                          disabled={isLoading}
-                        >
-                          {showPassword ? 'Hide' : 'Show'}
-                        </button>
-                      </div>
+                    <FormItem className="fade-in-cascade">
+                      <FormLabel className="text-xs sm:text-sm font-medium text-gray-700">Password</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-500 pointer-events-none" />
+                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400 pointer-events-none" />
                           <Input
-                            type={showPassword ? 'text' : 'password'}
-                            placeholder="••••••••"
                             {...field}
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder="Enter a secure password"
                             disabled={isLoading}
-                            className="pl-10 pr-10 bg-white border border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all h-11"
+                            className="input-animated pl-9 sm:pl-10 pr-10 h-9 sm:h-10 text-xs sm:text-sm rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                           />
                           <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors disabled:cursor-not-allowed"
-                            disabled={isLoading}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                            tabIndex={-1}
                           >
                             {showPassword ? (
-                              <EyeOff className="w-5 h-5" />
+                              <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" />
                             ) : (
-                              <Eye className="w-5 h-5" />
+                              <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
                             )}
                           </button>
                         </div>
                       </FormControl>
-                      <FormMessage className="text-red-500 text-xs font-medium" />
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
@@ -254,94 +248,65 @@ export default function RegisterPage() {
                   control={form.control}
                   name="confirmPassword"
                   render={({ field }) => (
-                    <FormItem>
-                      <div className="flex items-center justify-between">
-                        <FormLabel className="text-gray-700 font-semibold text-sm">Confirm Password</FormLabel>
-                        <button
-                          type="button"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          className="text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors"
-                          disabled={isLoading}
-                        >
-                          {showConfirmPassword ? 'Hide' : 'Show'}
-                        </button>
-                      </div>
+                    <FormItem className="fade-in-cascade">
+                      <FormLabel className="text-xs sm:text-sm font-medium text-gray-700">Confirm Password</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-500 pointer-events-none" />
+                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400 pointer-events-none" />
                           <Input
-                            type={showConfirmPassword ? 'text' : 'password'}
-                            placeholder="••••••••"
                             {...field}
+                            type={showConfirmPassword ? 'text' : 'password'}
+                            placeholder="Confirm your password"
                             disabled={isLoading}
-                            className="pl-10 pr-10 bg-white border border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all h-11"
+                            className="input-animated pl-9 sm:pl-10 pr-10 h-9 sm:h-10 text-xs sm:text-sm rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                           />
                           <button
                             type="button"
                             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors disabled:cursor-not-allowed"
-                            disabled={isLoading}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                            tabIndex={-1}
                           >
                             {showConfirmPassword ? (
-                              <EyeOff className="w-5 h-5" />
+                              <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" />
                             ) : (
-                              <Eye className="w-5 h-5" />
+                              <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
                             )}
                           </button>
                         </div>
                       </FormControl>
-                      <FormMessage className="text-red-500 text-xs font-medium" />
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
 
                 {/* Submit Button */}
-                <Button 
-                  type="submit" 
-                  className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-md hover:shadow-lg transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed text-base"
+                <Button
+                  type="submit"
                   disabled={isLoading}
+                  className="w-full h-9 sm:h-10 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm sm:text-base font-medium rounded-lg mt-4 sm:mt-6 btn-punch fade-in-cascade"
                 >
-                  <span className="flex items-center justify-center gap-2">
-                    {isLoading ? (
-                      <>
-                        <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                        </svg>
-                        Creating Account...
-                      </>
-                    ) : (
-                      <>
-                        <span>Create Account</span>
-                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                      </>
-                    )}
-                  </span>
+                  {isLoading ? 'Creating account...' : 'Create Account'}
+                  {!isLoading && <ArrowRight className="ml-2 w-4 h-4" />}
                 </Button>
               </form>
             </Form>
 
-            {/* Divider */}
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-xs">
-                <span className="px-3 bg-white text-gray-600 font-medium">Already have an account?</span>
-              </div>
+            {/* Sign in link */}
+            <div className="text-center pt-2 sm:pt-4">
+              <p className="text-xs sm:text-sm text-gray-600">
+                Already have an account?{' '}
+                <Link href="/auth/login" className="text-blue-600 hover:text-blue-700 font-semibold transition-colors">
+                  Sign in
+                </Link>
+              </p>
             </div>
-
-            {/* Sign In Link */}
-            <Link href="/auth/login" className="w-full inline-block">
-              <Button
-                type="button"
-                className="w-full h-11 border border-gray-300 hover:border-blue-500 bg-white hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-semibold transition-all duration-200 text-base"
-              >
-                Sign In Instead
-              </Button>
-            </Link>
           </CardContent>
         </Card>
+
+        {/* Footer note */}
+        <div className="mt-6 sm:mt-8 text-center text-xs sm:text-sm text-gray-500 fade-in-cascade">
+          <p>Secure registration • Your data is encrypted</p>
+        </div>
       </div>
     </div>
   )

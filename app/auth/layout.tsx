@@ -35,7 +35,7 @@ export default async function AuthLayout({
                 Financial Control Panel
               </h1>
               <p className="text-gray-400 mt-2">
-                Manage your finances with ease
+                Manage finances with ease
               </p>
             </div>
             {children}
