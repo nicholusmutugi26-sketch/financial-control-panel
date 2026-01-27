@@ -61,7 +61,7 @@ export const authOptions: NextAuthOptions = {
             id: user.id,
             email: user.email,
             name: user.name,
-            role: (user.role || 'USER') as 'ADMIN' | 'USER',
+            role: (user.email === 'admin@financialpanel.com' ? 'ADMIN' : 'USER') as 'ADMIN' | 'USER',
             isApproved: user.isApproved,
             image: user.profileImage,
           } as any
@@ -92,9 +92,10 @@ export const authOptions: NextAuthOptions = {
         try {
           const dbUser = await prisma.user.findUnique({ where: { id: token.id as string } })
           if (dbUser) {
-            // Enforce strict role assignment based on database
+            // SECURITY: Only the designated admin email gets ADMIN role
+            // This prevents any user with 'ADMIN' role in DB from getting admin privileges
             let newRole: "ADMIN" | "USER" = "USER"
-            if (dbUser.email === 'admin@financialpanel.com' || dbUser.role === 'ADMIN') {
+            if (dbUser.email === 'admin@financialpanel.com') {
               newRole = 'ADMIN'
             }
             
@@ -133,9 +134,10 @@ export const authOptions: NextAuthOptions = {
           })
           
           if (dbUser) {
-            // Enforce strict role assignment based on database
+            // SECURITY: Only the designated admin email gets ADMIN role
+            // This prevents any user with 'ADMIN' role in DB from getting admin privileges
             let finalRole: "ADMIN" | "USER" = "USER"
-            if (dbUser.email === 'admin@financialpanel.com' || dbUser.role === 'ADMIN') {
+            if (dbUser.email === 'admin@financialpanel.com') {
               finalRole = 'ADMIN'
             }
             
