@@ -17,7 +17,8 @@ import {
   LogOut,
   Menu,
   X,
-  Shield
+  Shield,
+  RefreshCw
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -68,7 +69,24 @@ export default function DashboardNav({ user }: DashboardNavProps) {
   const pathname = usePathname()
   const { data: session, update } = useSession()
   const [isUploading, setIsUploading] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const navItems = user.role === 'ADMIN' ? adminNavItems : userNavItems
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true)
+    try {
+      // Update session data
+      await update()
+      
+      // Refresh the page data by triggering a soft reload
+      window.location.reload()
+    } catch (error) {
+      console.error('Refresh failed:', error)
+      toast.error('Failed to refresh data')
+    } finally {
+      setIsRefreshing(false)
+    }
+  }
 
   const NavItem = ({ href, label, icon: Icon }: typeof navItems[0]) => {
     const isActive = pathname === href || pathname?.startsWith(`${href}/`)
@@ -146,6 +164,18 @@ export default function DashboardNav({ user }: DashboardNavProps) {
 
         {/* Right Side Actions */}
         <div className="flex items-center gap-4">
+          {/* Refresh Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="h-8 w-8"
+            title="Refresh data"
+          >
+            <RefreshCw className={cn('h-4 w-4', isRefreshing && 'animate-spin')} />
+          </Button>
+
           {/* Notifications Bell */}
           <NotificationBell />
 

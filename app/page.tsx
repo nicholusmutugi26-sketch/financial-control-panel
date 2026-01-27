@@ -3,6 +3,7 @@ import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import InstallButton from '@/components/InstallButton'
 
 export default async function HomePage() {
   const session = await getServerSession(authOptions)
@@ -25,11 +26,12 @@ export default async function HomePage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-violet-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">FCP</span>
+              <span className="text-white font-bold text-sm"></span>
             </div>
             <span className="text-white font-semibold text-lg">Financial Control Panel</span>
           </div>
           <div className="flex items-center space-x-3">
+            <InstallButton />
             <Button size="sm" variant="ghost" asChild className="text-blue-300 hover:text-white hover:bg-blue-700/30">
               <Link href="/auth/login">
                 Sign In
@@ -37,7 +39,7 @@ export default async function HomePage() {
             </Button>
             <Button size="sm" asChild className="bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white shadow-lg hover:shadow-xl text-xs sm:text-sm font-medium">
               <Link href="/auth/register">
-                Get Started
+                Sign up
               </Link>
             </Button>
           </div>
@@ -55,13 +57,13 @@ export default async function HomePage() {
               </span>
             </h1>
             <p className="text-lg sm:text-xl text-blue-200 mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed">
-              Manage budgets, track expenses, and collaborate with your family in real-time.
-              Secure, intuitive, and designed for modern families.
+              Manage budgets, track expenses, and collaborate with family in real-time.
+              Secure and intuitive.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button size="lg" asChild className="bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white shadow-lg hover:shadow-xl px-8 py-3 text-base font-semibold">
                 <Link href="/auth/register">
-                  Start Managing Money
+                  Sign Up
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild className="border-blue-400 text-blue-300 hover:bg-blue-400/10 hover:text-white px-8 py-3 text-base font-semibold">
@@ -99,36 +101,19 @@ export default async function HomePage() {
             </div>
 
             <div className="bg-slate-800/50 backdrop-blur-md border border-blue-700/30 rounded-xl p-6 hover:bg-slate-800/70 transition-all duration-300">
-              <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-lg flex items-center justify-center mb-4 mx-auto">
+              <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-green-500 rounded-lg flex items-center justify-center mb-4 mx-auto">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">Bank-Level Security</h3>
+              <h3 className="text-xl font-semibold text-white mb-2">Real-time Tracking</h3>
               <p className="text-blue-200 text-sm leading-relaxed">
-                Enterprise-grade security with encrypted data and secure authentication.
+                Monitor expenses and budgets with instant updates and notifications.
               </p>
             </div>
           </div>
-
-          {/* CTA Section */}
-          <div className="bg-gradient-to-r from-blue-600/20 to-violet-600/20 backdrop-blur-md border border-blue-500/30 rounded-2xl p-8 sm:p-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
-              Ready to Take Control?
-            </h2>
-            <p className="text-blue-200 mb-6 text-lg">
-              Join thousands of families already managing their finances smarter.
-            </p>
-            <Button size="lg" asChild className="bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white shadow-lg hover:shadow-xl px-8 py-3 text-base font-semibold">
-              <Link href="/auth/register">
-                Create Your Account
-              </Link>
-            </Button>
-          </div>
         </div>
       </div>
-
-      {/* Footer */}
       <footer className="border-t border-blue-700/30 bg-slate-900/50 backdrop-blur-md mt-12 sm:mt-16 lg:mt-20 py-8 sm:py-12 relative z-10">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-blue-300 text-sm">
           <p className="mb-2">© 2026 Financial Control Panel. All rights reserved.</p>
