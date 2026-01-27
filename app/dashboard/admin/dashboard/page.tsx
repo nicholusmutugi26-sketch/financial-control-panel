@@ -158,7 +158,7 @@ export default async function AdminDashboardPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-            <p className="text-gray-600">Overview of the family finance panel</p>
+            <p className="text-gray-600">Overview of the finance flow control panel</p>
           </div>
         </div>
 

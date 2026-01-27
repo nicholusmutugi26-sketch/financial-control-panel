@@ -444,7 +444,7 @@ function generateFinancialPerformance(
     {} as Record<string, number>
   )
 
-  const monthlyTrends = Object.entries(monthlyExpenditures).map(([month, actual]) => {
+  const monthlyTrends = Object.entries(monthlyExpenditures as Record<string, number>).map(([month, actual]) => {
     const forecasted = actual * 0.95 // Simple forecast
     const variance = actual - forecasted
     return {
@@ -466,7 +466,14 @@ function generateFinancialPerformance(
 
   const expenditureTracking: ExpenditureTracking = {
     monthlyTrends,
-    significantVariances: monthlyTrends.filter((t) => Math.abs(t.variancePercentage) > 10),
+    significantVariances: monthlyTrends
+      .filter((t) => Math.abs(t.variancePercentage) > 10)
+      .map((t) => ({
+        description: `${t.month} - ${t.explanation}`,
+        category: 'Monthly Expenditure',
+        amount: t.variance,
+        percentage: t.variancePercentage,
+      })),
   }
 
   const remittanceAnalysis: RemittanceAnalysis = {

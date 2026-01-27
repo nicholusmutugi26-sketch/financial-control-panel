@@ -62,7 +62,7 @@ export default async function HomePage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
             <Button size="lg" asChild className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold shadow-2xl hover:shadow-3xl transition-all h-12 px-8 text-base">
               <Link href="/auth/register">
-                Sign Up Free
+                Sign Up 
               </Link>
             </Button>
             <Button size="lg" variant="outline" asChild className="border-2 border-blue-400 text-blue-200 hover:bg-blue-700/20 hover:text-blue-100 font-semibold shadow-lg hover:shadow-xl h-12 px-8 text-base">
@@ -127,32 +127,12 @@ export default async function HomePage() {
           </div>
         </div>
 
-        {/* Trust Section */}
-        <div className="max-w-4xl mx-auto bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-md border border-blue-400/30 rounded-2xl p-12 text-center shadow-2xl">
-          <h2 className="text-3xl font-bold text-white mb-6">Trusted by Families Worldwide</h2>
-          <div className="grid grid-cols-3 gap-8 mb-8">
-            <div>
-              <div className="text-4xl font-bold text-blue-300 mb-2">1000+</div>
-              <p className="text-blue-100">Active Families</p>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-blue-300 mb-2">₪100M</div>
-              <p className="text-blue-100">Managed Together</p>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-blue-300 mb-2">99.9%</div>
-              <p className="text-blue-100">Uptime</p>
-            </div>
-          </div>
-          <p className="text-blue-100 text-lg">Enterprise-grade security with bank-level encryption for your complete peace of mind.</p>
         </div>
-      </div>
 
       {/* Footer */}
       <footer className="border-t border-blue-700/30 bg-slate-900/50 backdrop-blur-sm mt-20 py-12">
         <div className="container mx-auto px-4 text-center text-blue-300">
           <p className="mb-4">© 2026 Financial Control Panel. All rights reserved.</p>
-          <p className="text-blue-400 text-sm">Designed for families and partners who value financial transparency.</p>
         </div>
       </footer>
     </div>

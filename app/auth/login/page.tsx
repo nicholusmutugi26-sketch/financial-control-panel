@@ -111,7 +111,7 @@ export default function LoginPage() {
                           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-500 pointer-events-none" />
                           <Input
                             type="email"
-                            placeholder="your@email.com"
+                            placeholder="input email"
                             {...field}
                             disabled={isLoading}
                             className="pl-10 bg-white border border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all h-11"

@@ -144,7 +144,7 @@ export default function RegisterPage() {
                         <div className="relative">
                           <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-500 pointer-events-none" />
                           <Input
-                            placeholder="John Doe"
+                            placeholder="Full Name"
                             {...field}
                             disabled={isLoading}
                             className="pl-10 bg-white border border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all h-11"
@@ -168,7 +168,7 @@ export default function RegisterPage() {
                           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-500 pointer-events-none" />
                           <Input
                             type="email"
-                            placeholder="your@email.com"
+                            placeholder="input email"
                             {...field}
                             disabled={isLoading}
                             className="pl-10 bg-white border border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all h-11"
@@ -191,7 +191,7 @@ export default function RegisterPage() {
                         <div className="relative">
                           <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-500 pointer-events-none" />
                           <Input
-                            placeholder="254712345678"
+                            placeholder="2547........"
                             {...field}
                             disabled={isLoading}
                             className="pl-10 bg-white border border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all h-11"
