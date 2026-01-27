@@ -99,27 +99,44 @@ export default function ProfilePage() {
       return
     }
 
+    // Ensure userId exists
+    if (!session?.user?.id) {
+      toast.error('User ID not found. Please refresh and try again.')
+      return
+    }
+
     const formData = new FormData()
     formData.append('file', file)
-    formData.append('userId', session?.user?.id || '')
+    formData.append('userId', session.user.id)
 
     try {
       setIsLoading(true)
+      
+      console.log('Uploading profile image...', { userId: session.user.id, fileName: file.name, fileSize: file.size })
+
       const response = await fetch('/api/upload/profile', {
         method: 'POST',
         body: formData,
       })
 
+      console.log('Upload response status:', response.status, response.statusText)
+
       const result = await response.json()
 
+      console.log('Upload response data:', result)
+
       if (!response.ok) {
-        throw new Error(result.error || 'Upload failed')
+        throw new Error(result.error || result.message || `Upload failed with status ${response.status}`)
+      }
+
+      if (!result.url) {
+        throw new Error('No URL returned from upload')
       }
 
       setProfileImage(result.url)
       toast.success('Profile picture updated successfully')
       
-      // Update session
+      // Update session with new image
       await update({
         ...session,
         user: {
@@ -127,10 +144,18 @@ export default function ProfilePage() {
           image: result.url,
         }
       })
+      
+      // Refresh the page to show updated image everywhere
+      router.refresh()
     } catch (error: any) {
-      toast.error(error.message)
+      console.error('Image upload error:', error)
+      toast.error(error.message || 'Failed to upload profile picture')
     } finally {
       setIsLoading(false)
+      // Reset file input
+      if (event.target) {
+        event.target.value = ''
+      }
     }
   }
 
@@ -171,10 +196,10 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Profile Settings</h1>
-        <p className="text-gray-600">
+    <div className="space-y-6 page-enter">
+      <div className="fade-in-cascade">
+        <h1 className="welcome-header text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">Profile Settings</h1>
+        <p className="text-gray-600 text-sm sm:text-base mt-2">
           Manage your profile information and preferences
         </p>
       </div>
