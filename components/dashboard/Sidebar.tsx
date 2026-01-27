@@ -21,10 +21,11 @@ import {
   TrendingUp,
   CreditCard
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Camera } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { signOut } from 'next-auth/react'
 
@@ -130,61 +131,6 @@ export default function Sidebar({ user }: SidebarProps) {
                   {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              {!collapsed && (
-                <label htmlFor="sidebar-profile-upload" className="absolute -bottom-1 -right-1 cursor-pointer">
-                  <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center hover:bg-primary/90">
-                    <Camera className="h-3 w-3 text-white" />
-                  </div>
-                  <input
-                    id="sidebar-profile-upload"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0]
-                      if (!file) return
-                      if (!file.type.startsWith('image/')) {
-                        toast.error('Please upload an image file')
-                        return
-                      }
-                      if (file.size > 5 * 1024 * 1024) {
-                        toast.error('Image must be less than 5MB')
-                        return
-                      }
-
-                      const formData = new FormData()
-                      formData.append('file', file)
-                      formData.append('userId', session?.user?.id || user.id)
-
-                      try {
-                        setIsUploading(true)
-                        const res = await fetch('/api/upload/profile', {
-                          method: 'POST',
-                          body: formData,
-                        })
-                        const result = await res.json()
-                        if (!res.ok) throw new Error(result.error || 'Upload failed')
-                        toast.success('Profile picture updated')
-                        // update session if available
-                        if (update) {
-                          await update({
-                            ...session,
-                            user: {
-                              ...session?.user,
-                              image: result.url,
-                            }
-                          })
-                        }
-                      } catch (err: any) {
-                        toast.error(err?.message || 'Upload failed')
-                      } finally {
-                        setIsUploading(false)
-                      }
-                    }}
-                    disabled={isUploading}
-                  />
-                </label>
-              )}
             </div>
             {!collapsed && (
               <div className="flex-1 overflow-hidden">

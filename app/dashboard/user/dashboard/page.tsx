@@ -86,7 +86,19 @@ export default async function UserDashboardPage() {
     prisma.$transaction([
       prisma.budget.aggregate({
         where: { createdBy: session.user.id },
-        _sum: { amount: true, allocatedAmount: true }
+        _sum: { amount: true }
+      }),
+      // Calculate allocated amount as sum of disbursed amounts for approved budgets
+      prisma.transaction.aggregate({
+        where: { 
+          userId: session.user.id,
+          type: 'DISBURSEMENT',
+          status: 'COMPLETED',
+          budget: {
+            status: { in: ['APPROVED', 'PARTIALLY_DISBURSED', 'DISBURSED'] }
+          }
+        },
+        _sum: { amount: true }
       }),
       prisma.expenditure.aggregate({
         where: { createdBy: session.user.id },
@@ -120,13 +132,13 @@ export default async function UserDashboardPage() {
 
   const userStats = {
     totalBudget: stats[0]._sum.amount || 0,
-    allocatedAmount: stats[0]._sum.allocatedAmount || 0,
-    totalExpenditures: stats[1]._sum.amount || 0,
-    pendingBudgets: stats[2],
-    pendingExpenditures: stats[3],
-    activeProjects: stats[4],
+    allocatedAmount: stats[1]._sum.amount || 0,
+    totalExpenditures: stats[2]._sum.amount || 0,
+    pendingBudgets: stats[3],
+    pendingExpenditures: stats[4],
+    activeProjects: stats[5],
     // total budgets + approved supplementary - total expenditures
-    availableBalance: (stats[0]._sum.amount || 0) + (stats[5]?._sum?.amount || 0) - (stats[1]._sum.amount || 0)
+    availableBalance: (stats[0]._sum.amount || 0) + (stats[6]?._sum?.amount || 0) - (stats[2]._sum.amount || 0)
   }
 
   return (

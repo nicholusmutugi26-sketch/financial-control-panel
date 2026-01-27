@@ -17,8 +17,7 @@ import {
   LogOut,
   Menu,
   X,
-  Shield,
-  Camera
+  Shield
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -172,60 +171,6 @@ export default function DashboardNav({ user }: DashboardNavProps) {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              {user.role !== 'ADMIN' && (
-                <>
-                  <DropdownMenuItem asChild>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <Camera className="mr-2 h-4 w-4" />
-                      Upload profile picture
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
-                          const file = e.target.files?.[0]
-                          if (!file) return
-                          if (!file.type.startsWith('image/')) {
-                            toast.error('Please upload an image file')
-                            return
-                          }
-                          if (file.size > 5 * 1024 * 1024) {
-                            toast.error('Image must be less than 5MB')
-                            return
-                          }
-
-                          const formData = new FormData()
-                          formData.append('file', file)
-                          formData.append('userId', user.id)
-
-                          try {
-                            setIsUploading(true)
-                        const res = await fetch('/api/upload/profile', { method: 'POST', body: formData })
-                        const result = await res.json()
-                        if (!res.ok) throw new Error(result.error || 'Upload failed')
-                        toast.success('Profile picture updated')
-                        if (update) {
-                          await update({
-                            ...session,
-                            user: {
-                              ...session?.user,
-                              image: result.url,
-                            }
-                          })
-                        }
-                      } catch (err: any) {
-                        toast.error(err?.message || 'Upload failed')
-                      } finally {
-                        setIsUploading(false)
-                      }
-                    }}
-                    disabled={isUploading}
-                  />
-                </label>
-              </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                </>
-              )}
               <DropdownMenuItem asChild>
                 <Link href="/dashboard/user/profile" className="cursor-pointer">
                   <User className="mr-2 h-4 w-4" />
