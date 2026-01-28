@@ -45,23 +45,43 @@ export default function LoginPage() {
     try {
       setIsLoading(true)
       
+      // Call signIn with redirect: false to get the result first
       const result = await signIn('credentials', {
         email: data.email,
         password: data.password,
-        redirect: false,
+        redirect: false, // We'll handle redirect manually
       })
 
+      console.log('SignIn result:', result)
+
+      // Check if login was successful
       if (result?.error) {
+        console.error('Login failed:', result.error)
         toast.error('Invalid email or password')
+        setIsLoading(false)
         return
       }
 
+      if (!result?.ok) {
+        console.error('Login failed - not ok')
+        toast.error('Invalid email or password')
+        setIsLoading(false)
+        return
+      }
+
+      // Login was successful - now redirect
+      console.log('Login successful, redirecting to /dashboard')
       toast.success('Logged in successfully')
-      router.push('/dashboard')
-      router.refresh()
+      
+      // Use router.push instead of relying on redirect: true
+      // This ensures we redirect AFTER the session is established
+      // Add a small delay to ensure NextAuth session is fully established
+      setTimeout(() => {
+        router.push('/dashboard')
+      }, 500)
     } catch (error) {
+      console.error('Login error:', error)
       toast.error('Something went wrong')
-    } finally {
       setIsLoading(false)
     }
   }
@@ -90,7 +110,7 @@ export default function LoginPage() {
           </div>
           
           <h1 className="welcome-header text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">Welcome back!</h1>
-          <p className="text-sm sm:text-base text-gray-600">Sign in to manage your finances</p>
+          <p className="text-sm sm:text-base text-gray-600">Sign in to manage finances</p>
         </div>
 
         {/* Login Card */}
