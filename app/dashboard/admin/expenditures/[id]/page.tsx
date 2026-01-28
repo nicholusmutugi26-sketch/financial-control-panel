@@ -66,9 +66,6 @@ export default async function Page({ params }: { params: { id: string } }) {
 							<p className="text-sm text-gray-500">Amount</p>
 							<p className="text-lg font-medium">{formatCurrency(expenditure.amount)}</p>
 
-							<p className="mt-4 text-sm text-gray-500">Status</p>
-							<p className="font-medium">{expenditure.status}</p>
-
 							<p className="mt-4 text-sm text-gray-500">Created</p>
 							<p className="font-medium">{formatDate(expenditure.createdAt)}</p>
 						</div>

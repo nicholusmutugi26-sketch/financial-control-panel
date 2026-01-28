@@ -18,12 +18,14 @@ import {
   AlertCircle,
   FileText,
   BarChart3,
-  DollarSign
+  DollarSign,
+  RefreshCw
 } from 'lucide-react'
 import AdminStatsChart from '@/components/charts/AdminStatsChart'
 import SupplementaryPending from '@/components/admin/SupplementaryPending'
 import FundPoolAdjust from '@/components/admin/FundPoolAdjust'
 import RemittancesList from '@/components/admin/RemittancesList'
+import RefreshButton from '@/components/dashboard/RefreshButton'
 
 export default async function AdminDashboardPage() {
   const session = await getServerSession(authOptions)
@@ -159,6 +161,9 @@ export default async function AdminDashboardPage() {
           <div className="flex-1">
             <h1 className="welcome-header text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">Admin Dashboard</h1>
             <p className="text-gray-600 text-sm sm:text-base mt-1 sm:mt-2 fade-in-cascade">Overview of the finance flow control panel</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <RefreshButton />
           </div>
         </div>
 

@@ -61,11 +61,6 @@ export default function ExpenditureCard({
             </CardDescription>
           </div>
           <div className="flex flex-col items-end gap-2 ml-2">
-            <Badge className={getStatusColor(expenditure.status)}>
-              {expenditure.status === 'APPROVED' && <CheckCircle className="mr-1 h-3 w-3" />}
-              {expenditure.status === 'REJECTED' && <XCircle className="mr-1 h-3 w-3" />}
-              {expenditure.status}
-            </Badge>
             <Badge className={getPriorityColor(expenditure.priority)}>
               {expenditure.priority}
             </Badge>
@@ -145,23 +140,12 @@ export default function ExpenditureCard({
               </Link>
             </Button>
             
-            {(expenditure.status === 'DRAFT' || expenditure.status === 'PENDING') && (
-              <Button size="sm" variant="outline" asChild>
-                <Link href={`/dashboard/${isAdmin ? 'admin' : 'user'}/expenditures/${expenditure.id}/edit`}>
-                  <Edit className="mr-2 h-4 w-4" />
-                  Edit
-                </Link>
-              </Button>
-            )}
-            
-            {isAdmin && expenditure.status === 'PENDING' && (
-              <Button size="sm" asChild>
-                <Link href={`/dashboard/admin/expenditures/${expenditure.id}/approve`}>
-                  <CheckCircle className="mr-2 h-4 w-4" />
-                  Review
-                </Link>
-              </Button>
-            )}
+            <Button size="sm" variant="outline" asChild>
+              <Link href={`/dashboard/${isAdmin ? 'admin' : 'user'}/expenditures/${expenditure.id}/edit`}>
+                <Edit className="mr-2 h-4 w-4" />
+                Edit
+              </Link>
+            </Button>
           </div>
         </CardFooter>
       )}

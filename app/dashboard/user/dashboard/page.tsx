@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { formatCurrency, formatDate, getStatusColor } from '@/lib/utils'
 import { 
@@ -12,9 +13,11 @@ import {
   TrendingUp, 
   Clock,
   FileText,
-  AlertCircle
+  AlertCircle,
+  RefreshCw
 } from 'lucide-react'
 import RemitForm from '@/components/forms/RemitForm'
+import RefreshButton from '@/components/dashboard/RefreshButton'
 
 export default async function UserDashboardPage() {
   const session = await getServerSession(authOptions)
@@ -137,8 +140,8 @@ export default async function UserDashboardPage() {
     pendingBudgets: stats[3],
     pendingExpenditures: stats[4],
     activeProjects: stats[5],
-    // total budgets + approved supplementary - total expenditures
-    availableBalance: (stats[0]._sum.amount || 0) + (stats[6]?._sum?.amount || 0) - (stats[2]._sum.amount || 0)
+    // Approved allocated funds (disbursed) minus total expenditures
+    availableBalance: (stats[1]._sum.amount || 0) - (stats[2]._sum.amount || 0)
   }
 
   return (
@@ -147,10 +150,11 @@ export default async function UserDashboardPage() {
         <div className="flex-1">
           <h1 className="welcome-header text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">Dashboard</h1>
           <p className="text-gray-600 text-sm sm:text-base mt-1 sm:mt-2 fade-in-cascade">
-            Welcome back! Here's your financial overview.
+            Welcome back! Here&apos;s your financial overview.
           </p>
         </div>
-        <div className="flex gap-2 w-full sm:w-auto fade-in-cascade">
+        <div className="flex items-center gap-2">
+          <RefreshButton />
           <Button asChild className="flex-1 sm:flex-none">
             <Link href="/dashboard/user/budgets/new">
               New Budget
@@ -182,7 +186,7 @@ export default async function UserDashboardPage() {
         </Card>
         <Card className="card-elevated">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-            <CardTitle className="text-sm font-semibold text-foreground/80">Available Balance</CardTitle>
+            <CardTitle className="text-sm font-semibold text-foreground/80">Available Funds</CardTitle>
             <div className="p-2 rounded-lg bg-accent/10">
               <TrendingUp className="h-5 w-5 text-accent" />
             </div>
@@ -190,7 +194,7 @@ export default async function UserDashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold text-accent">{formatCurrency(userStats.availableBalance)}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              {userStats.pendingBudgets} budgets pending
+              Allocated funds minus expenditures
             </p>
           </CardContent>
         </Card>

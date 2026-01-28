@@ -27,7 +27,7 @@ export default function PendingApprovalPage() {
           <p className="text-sm text-blue-900">
             <strong>What happens next?</strong>
             <br />
-            An admin will review your registration and approve your access. You'll receive a notification once approved.
+            An admin will review your registration and approve your access. You&apos;ll receive a notification once approved.
           </p>
         </div>
 

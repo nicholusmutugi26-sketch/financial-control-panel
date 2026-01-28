@@ -291,13 +291,7 @@ export default async function UserStatisticsPage() {
                   }`}>
                     {expenditure.priority}
                   </span>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    expenditure.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
-                    expenditure.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                    expenditure.status === 'REJECTED' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'
-                  }`}>
-                    {expenditure.status}
-                  </span>
+
                 </div>
               </div>
             ))}

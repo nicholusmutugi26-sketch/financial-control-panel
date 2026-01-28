@@ -16,7 +16,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }))
 
   return (
-    <SessionProvider>
+    <SessionProvider
+      refetchInterval={5 * 60} // Refetch session every 5 minutes
+      refetchOnWindowFocus={true} // Refetch when window regains focus
+      refetchWhenOffline={false} // Don't refetch when offline
+    >
       <QueryClientProvider client={queryClient}>
         <ErrorBoundaryWrapper>
           <SocketProvider>
@@ -38,7 +42,7 @@ function ErrorBoundaryWrapper({ children }: { children: React.ReactNode }) {
   if (hasError) {
     return (
       <div style={{ padding: '20px', color: '#d32f2f' }}>
-        <p>Failed to initialize Socket.IO connection. This is optional and won't affect core functionality.</p>
+        <p>Failed to initialize Socket.IO connection. This is optional and won&apos;t affect core functionality.</p>
         <button onClick={() => setHasError(false)} style={{ marginTop: '10px', padding: '8px 16px' }}>
           Retry
         </button>

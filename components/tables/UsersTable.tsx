@@ -3,6 +3,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { 
@@ -135,9 +136,11 @@ export default function UsersTable({
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
                       {user.profileImage ? (
-                        <img 
-                          src={user.profileImage} 
+                        <Image
+                          src={user.profileImage}
                           alt={user.name}
+                          width={40}
+                          height={40}
                           className="h-10 w-10 rounded-full"
                         />
                       ) : (

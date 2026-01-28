@@ -25,7 +25,7 @@ export default async function UserSupplementaryPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">My Supplementary Requests</h1>
-          <p className="text-gray-600">Review the supplementary budget requests you've submitted.</p>
+          <p className="text-gray-600">Review the supplementary budget requests you&apos;ve submitted.</p>
         </div>
         <div />
       </div>

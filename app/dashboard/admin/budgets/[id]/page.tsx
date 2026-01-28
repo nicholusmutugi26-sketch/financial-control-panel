@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import Link from 'next/link'
+import Image from 'next/image'
 import { 
   ArrowLeft,
   CheckCircle,
@@ -249,9 +250,11 @@ export default async function BudgetDetailsPage({
               <div className="flex items-center gap-4">
                 <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
                   {budget.user.profileImage ? (
-                    <img 
-                      src={budget.user.profileImage} 
+                    <Image
+                      src={budget.user.profileImage}
                       alt={budget.user.name || 'User'}
+                      width={48}
+                      height={48}
                       className="h-12 w-12 rounded-full"
                     />
                   ) : (
@@ -455,9 +458,6 @@ export default async function BudgetDetailsPage({
                       <div className="flex items-center gap-2">
                         <Badge className={getPriorityColor(expenditure.priority || 'MEDIUM')}>
                           {expenditure.priority || 'MEDIUM'}
-                        </Badge>
-                        <Badge className={getStatusColor(expenditure.status || 'PENDING')}>
-                          {expenditure.status || 'PENDING'}
                         </Badge>
                         <Button size="sm" variant="outline" asChild>
                           <Link href={`/dashboard/admin/expenditures/${expenditure.id}`}>

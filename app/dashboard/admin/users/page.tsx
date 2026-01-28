@@ -5,15 +5,16 @@ import { prisma } from '@/lib/prisma'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { 
-  Users, 
-  UserPlus, 
-  Shield, 
+import {
+  Users,
+  UserPlus,
+  Shield,
   UserCheck,
   Mail,
   Phone
 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import UserActions from '@/components/admin/UserActions'
 import PendingUsersApproval from '@/components/admin/PendingUsersApproval'
 import { formatDate } from '@/lib/utils'
@@ -156,9 +157,11 @@ export default async function AdminUsersPage() {
                   <div className="flex items-center gap-4">
                     <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
                       {user.profileImage ? (
-                        <img 
-                          src={user.profileImage} 
+                        <Image
+                          src={user.profileImage}
                           alt={user.name || 'User'}
+                          width={40}
+                          height={40}
                           className="h-10 w-10 rounded-full"
                         />
                       ) : (
@@ -220,9 +223,11 @@ export default async function AdminUsersPage() {
                   <div className="flex items-center gap-4">
                     <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
                       {user.profileImage ? (
-                        <img 
-                          src={user.profileImage} 
+                        <Image
+                          src={user.profileImage}
                           alt={user.name || 'User'}
+                          width={40}
+                          height={40}
                           className="h-10 w-10 rounded-full"
                         />
                       ) : (

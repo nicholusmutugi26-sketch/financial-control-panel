@@ -61,7 +61,7 @@ export default function UserMenu({ user }: UserMenuProps) {
           <div className="max-h-80 overflow-y-auto">
             <div className="p-4 text-sm">
               <p className="font-medium">Budget Approved</p>
-              <p className="text-gray-500">Your budget "Office Supplies" has been approved</p>
+              <p className="text-gray-500">Your budget &quot;Office Supplies&quot; has been approved</p>
               <p className="text-xs text-gray-400 mt-1">2 hours ago</p>
             </div>
             <DropdownMenuSeparator />
@@ -73,7 +73,7 @@ export default function UserMenu({ user }: UserMenuProps) {
             <DropdownMenuSeparator />
             <div className="p-4 text-sm">
               <p className="font-medium">Project Voting Started</p>
-              <p className="text-gray-500">"Website Redesign" project is now open for voting</p>
+              <p className="text-gray-500">&quot;Website Redesign&quot; project is now open for voting</p>
               <p className="text-xs text-gray-400 mt-1">3 days ago</p>
             </div>
           </div>
@@ -150,13 +150,43 @@ export default function UserMenu({ user }: UserMenuProps) {
           <DropdownMenuItem
             className="cursor-pointer text-red-600 focus:text-red-600"
             onClick={async () => {
-              // Clear all session data on logout
-              await signOut({ 
-                callbackUrl: '/auth/login',
-                redirect: true 
-              })
-              // Force page refresh to clear any cached session state
-              window.location.href = '/auth/login'
+              try {
+                // Clear all storage and cookies on logout
+                if (typeof window !== 'undefined') {
+                  localStorage.clear()
+                  sessionStorage.clear()
+                  
+                  // Explicitly remove next-auth cookies
+                  const cookies = [
+                    'next-auth.session-token',
+                    'next-auth.csrf-token',
+                    'next-auth.callback-url',
+                    'next-auth.nonce'
+                  ]
+                  
+                  cookies.forEach(cookie => {
+                    document.cookie = `${cookie}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
+                  })
+                }
+
+                // Sign out with no redirect first
+                const result = await signOut({
+                  redirect: false,
+                  callbackUrl: '/auth/login'
+                })
+
+                // Force hard page reload to clear all caches
+                // This is critical to prevent session data from being reused
+                setTimeout(() => {
+                  window.location.href = '/auth/login?logout=true&t=' + Date.now()
+                }, 200)
+              } catch (error) {
+                console.error('Logout error:', error)
+                // Force redirect even if signOut fails
+                setTimeout(() => {
+                  window.location.href = '/auth/login?error=logout&t=' + Date.now()
+                }, 200)
+              }
             }}
           >
             <LogOut className="mr-2 h-4 w-4" />

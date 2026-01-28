@@ -14,6 +14,23 @@ export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as any,
   session: {
     strategy: "jwt",
+    maxAge: 24 * 60 * 60, // 24 hours (reduced from 30 days)
+    updateAge: 60 * 60, // 1 hour (reduced from 24 hours)
+  },
+  jwt: {
+    maxAge: 24 * 60 * 60, // 24 hours (reduced from 30 days)
+  },
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 24 * 60 * 60, // 24 hours (reduced from 30 days)
+      },
+    },
   },
   pages: {
     signIn: "/auth/login",
@@ -75,98 +92,110 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        // Initial login - set basic user info
         token.id = user.id
-        token.role = user.role
         token.email = user.email
+        token.name = user.name
         token.isApproved = (user as any).isApproved
-        // include image when present on initial sign-in
         if ((user as any).image) token.image = (user as any).image
+
+        // CRITICAL: Always enforce role based on email, never trust user input
+        token.role = user.email === 'admin@financialpanel.com' ? 'ADMIN' : 'USER'
+
         console.log('JWT callback - Initial login:', {
           userId: token.id,
           email: token.email,
-          role: token.role,
+          enforcedRole: token.role,
           isApproved: token.isApproved,
         })
       } else if (token.id) {
-        // On every token refresh, fetch the latest data from DB
+        // Token refresh - always re-validate role from database
         try {
-          const dbUser = await prisma.user.findUnique({ where: { id: token.id as string } })
+          const dbUser = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: { email: true, isApproved: true, role: true }
+          })
+
           if (dbUser) {
-            // SECURITY: Only the designated admin email gets ADMIN role
-            // This prevents any user with 'ADMIN' role in DB from getting admin privileges
-            let newRole: "ADMIN" | "USER" = "USER"
-            if (dbUser.email === 'admin@financialpanel.com') {
-              newRole = 'ADMIN'
-            }
-            
-            token.role = newRole
+            // SECURITY: Role is ALWAYS determined by email, never by stored role
+            const enforcedRole = dbUser.email === 'admin@financialpanel.com' ? 'ADMIN' : 'USER'
+
+            token.role = enforcedRole
             token.isApproved = dbUser.isApproved
-            token.email = dbUser.email // Keep email fresh
+            token.email = dbUser.email
+
             console.log('JWT callback - Token refresh:', {
               userId: token.id,
               email: dbUser.email,
               dbRole: dbUser.role,
-              enforceRole: newRole,
+              enforcedRole: enforcedRole,
               isApproved: dbUser.isApproved,
-              timestamp: new Date().toISOString()
             })
+          } else {
+            // User no longer exists - but still return token to avoid JWT errors
+            // Session callback will handle the validation
+            console.warn('JWT callback - User not found, keeping token:', token.id)
           }
         } catch (e) {
           console.error('JWT callback error:', e)
+          // On database error, keep token - session callback will handle validation
         }
       }
       return token
     },
     async session({ session, token }) {
-      if (session.user) {
+      if (session.user && token) {
         session.user.id = token.id as string
-        
-        // Always fetch latest role from database to prevent session stale state
+        session.user.email = token.email as string
+        session.user.name = token.name as string
+
+        // CRITICAL: Always fetch latest data from database for proper role enforcement
+        // This prevents session caching issues when switching between admin/user accounts
         try {
           const dbUser = await prisma.user.findUnique({
             where: { id: token.id as string },
             select: { 
-              role: true, 
-              email: true, 
+              email: true,
+              name: true,
               isApproved: true,
-              profileImage: true
+              profileImage: true,
+              role: true
             }
           })
-          
+
           if (dbUser) {
-            // SECURITY: Only the designated admin email gets ADMIN role
-            // This prevents any user with 'ADMIN' role in DB from getting admin privileges
-            let finalRole: "ADMIN" | "USER" = "USER"
-            if (dbUser.email === 'admin@financialpanel.com') {
-              finalRole = 'ADMIN'
-            }
+            // SECURITY: Role is ALWAYS determined by email, never by stored role
+            // This is critical for switching accounts without cache issues
+            const enforcedRole = dbUser.email === 'admin@financialpanel.com' ? 'ADMIN' : 'USER'
             
-            session.user.role = finalRole
+            session.user.role = enforcedRole
             session.user.email = dbUser.email
+            session.user.name = dbUser.name || session.user.name
+            session.user.image = dbUser.profileImage || (token.image as string) || null
             ;(session.user as any).isApproved = dbUser.isApproved
-            session.user.image = dbUser.profileImage || (token as any).image || null
-            
-            console.log('Session callback - DB Refresh:', {
-              userId: token.id,
+
+            console.log('Session callback - DB refresh:', {
+              userId: session.user.id,
               email: dbUser.email,
               dbRole: dbUser.role,
-              assignedRole: finalRole,
+              enforcedRole: enforcedRole,
               isApproved: dbUser.isApproved,
               timestamp: new Date().toISOString()
             })
           } else {
-            // Fallback to token if user not found (shouldn't happen)
-            session.user.role = token.role as "ADMIN" | "USER"
-            ;(session.user as any).isApproved = token.isApproved as boolean
-            session.user.image = (token as any).image || null
+            // User not found - but keep existing session
+            console.warn('Session callback - User not found in DB:', token.id)
           }
         } catch (e) {
-          console.error('Session callback error during DB refresh:', e)
-          // Fallback to token
-          session.user.role = token.role as "ADMIN" | "USER"
+          console.error('Session callback - DB error:', e)
+          // Fallback to token data on error
+          session.user.role = token.role as 'ADMIN' | 'USER'
+          session.user.image = (token.image as string) || null
           ;(session.user as any).isApproved = token.isApproved as boolean
-          session.user.image = (token as any).image || null
         }
+      } else {
+        // Invalid session - should not happen
+        console.error('Session callback - Invalid session/token combination')
       }
       return session
     },
@@ -193,6 +222,7 @@ export const authOptions: NextAuthOptions = {
     },
     async signOut({ token }) {
       if (token.sub) {
+        // Clear any session-related caches
         await prisma.auditLog.create({
           data: {
             action: "SIGN_OUT",

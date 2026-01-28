@@ -42,7 +42,7 @@ export default function EditBudgetItemsForm({ budgetId }: { budgetId: string }) 
       }
     })()
     return () => { mounted = false }
-  }, [budgetId])
+  }, [budgetId, form])
 
   const onSubmit = async (data: { items: Item[] }) => {
     try {

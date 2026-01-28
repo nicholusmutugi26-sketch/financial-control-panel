@@ -75,14 +75,19 @@ export default function DashboardNav({ user }: DashboardNavProps) {
   const handleRefresh = async () => {
     setIsRefreshing(true)
     try {
-      // Update session data
-      await update()
+      // Update session to get latest data
+      const result = await update()
       
-      // Refresh the page data by triggering a soft reload
-      window.location.reload()
+      console.log('Session updated:', result)
+      
+      // Use router.refresh() to refresh page data WITHOUT losing session
+      // This is different from window.location.reload() which can cause logout issues
+      window.location.href = window.location.href
+      
+      toast.success('Dashboard refreshed')
     } catch (error) {
       console.error('Refresh failed:', error)
-      toast.error('Failed to refresh data')
+      toast.error('Failed to refresh dashboard')
     } finally {
       setIsRefreshing(false)
     }
