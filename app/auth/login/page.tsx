@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import Link from 'next/link'
 import { Eye, EyeOff, Lock, Mail, ArrowRight } from 'lucide-react'
@@ -32,6 +32,19 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // Check for NextAuth errors in the URL
+  useEffect(() => {
+    if (!searchParams) return
+    
+    const error = searchParams.get('error')
+    if (error) {
+      toast.error('Invalid email or password')
+      // Remove the error from URL
+      window.history.replaceState({}, document.title, '/auth/login')
+    }
+  }, [searchParams])
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -44,19 +57,34 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormValues) => {
     try {
       setIsLoading(true)
+      console.log('Attempting login for:', data.email)
 
-      // Call signIn with redirect: true to let NextAuth handle the redirect
-      // The redirect callback in auth.ts will determine the correct dashboard URL
+      // Use redirect: false to handle response ourselves
       const result = await signIn('credentials', {
         email: data.email,
         password: data.password,
-        redirect: true, // Let NextAuth handle redirect to correct dashboard
-        callbackUrl: '/dashboard', // This will be overridden by redirect callback
+        redirect: false, // Handle redirect manually
       })
 
-      // If we reach here, something went wrong (signIn with redirect: true shouldn't return)
-      toast.error('Invalid email or password')
-      setIsLoading(false)
+      console.log('SignIn result:', result)
+
+      // If there's an error, show it
+      if (!result?.ok || result?.error) {
+        console.error('Login failed:', result?.error)
+        toast.error('Invalid email or password')
+        setIsLoading(false)
+        return
+      }
+
+      // Login successful - show success message
+      console.log('Login successful for:', data.email)
+      toast.success('Logged in successfully')
+
+      // Redirect to dashboard - let the dashboard page handle role-based routing
+      console.log('Redirecting to dashboard')
+      router.push('/dashboard')
+
+      // Don't set loading to false - let the page redirect
     } catch (error) {
       console.error('Login error:', error)
       toast.error('Something went wrong')
