@@ -45,67 +45,19 @@ export default function LoginPage() {
     try {
       setIsLoading(true)
       
-      // Call signIn with redirect: false to handle redirect manually
+      // Call signIn with redirect: true to let NextAuth handle the redirect
+      // The redirect callback in auth.ts will determine the correct dashboard URL
       const result = await signIn('credentials', {
         email: data.email,
         password: data.password,
-        redirect: false,
+        redirect: true, // Let NextAuth handle redirect to correct dashboard
+        callbackUrl: '/dashboard', // This will be overridden by redirect callback
       })
 
-      console.log('SignIn result:', result)
-
-      // Check if login was successful
-      if (result?.error) {
-        console.error('Login failed:', result.error)
-        toast.error('Invalid email or password')
-        setIsLoading(false)
-        return
-      }
-
-      if (!result?.ok) {
-        console.error('Login failed - not ok')
-        toast.error('Invalid email or password')
-        setIsLoading(false)
-        return
-      }
-
-      // Login was successful - wait for session to be established
-      console.log('Login successful, waiting for session...')
-      
-      // Wait longer for the session to be fully established in NextAuth
-      // This allows time for JWT callback, session callback, and database validation
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      // Try to get the session (may need multiple attempts)
-      let session = await getSession()
-      console.log('Session after first attempt:', session)
-
-      // If session doesn't have role, wait and try again
-      if (!session?.user?.role) {
-        console.warn('No role in first session attempt, retrying...')
-        await new Promise(resolve => setTimeout(resolve, 500))
-        session = await getSession()
-        console.log('Session after retry:', session)
-      }
-
-      if (!session?.user?.role) {
-        console.error('No role in session after retries')
-        toast.error('Failed to determine user role')
-        setIsLoading(false)
-        return
-      }
-
-      // Redirect to role-specific dashboard
-      toast.success('Logged in successfully')
-      const role = session.user.role
-      const redirectUrl = role === 'ADMIN' 
-        ? '/dashboard/admin/dashboard' 
-        : '/dashboard/user/dashboard'
-      
-      console.log(`Redirecting to ${redirectUrl} (role: ${role})`)
-      
-      // Use a hard redirect to ensure the middleware is executed
-      window.location.href = redirectUrl
+      // If we reach here, something went wrong (signIn with redirect: true shouldn't return)
+      console.log('SignIn returned unexpectedly:', result)
+      toast.error('Invalid email or password')
+      setIsLoading(false)
     } catch (error) {
       console.error('Login error:', error)
       toast.error('Something went wrong')

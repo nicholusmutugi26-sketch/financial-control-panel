@@ -7,6 +7,9 @@ import { redirect } from 'next/navigation'
  * CRITICAL: This is a security checkpoint - validate role and redirect
  */
 export default async function DashboardRootPage() {
+  // Wait a bit for session to be established after login
+  await new Promise(resolve => setTimeout(resolve, 100))
+
   const session = await getServerSession(authOptions)
 
   if (!session) {

@@ -25,9 +25,6 @@ export default async function HomePage() {
       <nav className="border-b border-blue-700/30 bg-slate-900/50 backdrop-blur-md sticky top-0 z-40">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-violet-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm"></span>
-            </div>
             <span className="text-white font-semibold text-lg">Financial Control Panel</span>
           </div>
           <div className="flex items-center space-x-3">
