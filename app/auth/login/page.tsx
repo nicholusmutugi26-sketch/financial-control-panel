@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { signIn } from 'next-auth/react'
+import { signIn, getSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import Link from 'next/link'
@@ -45,11 +45,11 @@ export default function LoginPage() {
     try {
       setIsLoading(true)
       
-      // Call signIn with redirect: false to get the result first
+      // Call signIn with redirect: false to handle redirect manually
       const result = await signIn('credentials', {
         email: data.email,
         password: data.password,
-        redirect: false, // We'll handle redirect manually
+        redirect: false,
       })
 
       console.log('SignIn result:', result)
@@ -69,16 +69,31 @@ export default function LoginPage() {
         return
       }
 
-      // Login was successful - now redirect
-      console.log('Login successful, redirecting to /dashboard')
-      toast.success('Logged in successfully')
+      // Login was successful - get the session to determine role
+      console.log('Login successful, fetching session...')
       
-      // Use router.push instead of relying on redirect: true
-      // This ensures we redirect AFTER the session is established
-      // Add a small delay to ensure NextAuth session is fully established
-      setTimeout(() => {
-        router.push('/dashboard')
-      }, 500)
+      // Wait a moment for the session to be established
+      await new Promise(resolve => setTimeout(resolve, 300))
+      
+      const session = await getSession()
+      console.log('Session:', session)
+
+      if (!session?.user?.role) {
+        console.error('No role in session')
+        toast.error('Failed to determine user role')
+        setIsLoading(false)
+        return
+      }
+
+      // Redirect to role-specific dashboard
+      toast.success('Logged in successfully')
+      const role = session.user.role
+      const redirectUrl = role === 'ADMIN' 
+        ? '/dashboard/admin/dashboard' 
+        : '/dashboard/user/dashboard'
+      
+      console.log(`Redirecting to ${redirectUrl} (role: ${role})`)
+      router.push(redirectUrl)
     } catch (error) {
       console.error('Login error:', error)
       toast.error('Something went wrong')

@@ -200,8 +200,8 @@ export const authOptions: NextAuthOptions = {
       return session
     },
     async redirect({ url, baseUrl }) {
-      // After login, always redirect to dashboard root which handles role-based routing
-      // Never return early - ensure we always go through the dashboard security checkpoint
+      // Basic redirect to dashboard root
+      // The login page will handle role-specific redirects after getting the session
       console.log('[Redirect callback]', { url, baseUrl })
       return `${baseUrl}/dashboard`
     }
