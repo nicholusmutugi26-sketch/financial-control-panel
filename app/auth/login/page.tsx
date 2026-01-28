@@ -80,11 +80,13 @@ export default function LoginPage() {
       console.log('Login successful for:', data.email)
       toast.success('Logged in successfully')
 
-      // Redirect to dashboard - let the dashboard page handle role-based routing
-      console.log('Redirecting to dashboard')
-      router.push('/dashboard')
-
-      // Don't set loading to false - let the page redirect
+      // Use window.location.href for a full page reload
+      // This ensures the session cookie is sent to the server
+      // and the dashboard can properly read the session
+      console.log('Performing full page redirect to dashboard')
+      setTimeout(() => {
+        window.location.href = '/dashboard'
+      }, 500) // Wait 500ms for NextAuth to fully establish the session
     } catch (error) {
       console.error('Login error:', error)
       toast.error('Something went wrong')
