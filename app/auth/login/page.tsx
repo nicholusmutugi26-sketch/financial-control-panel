@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { signIn, getSession } from 'next-auth/react'
+import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import Link from 'next/link'
@@ -44,7 +44,7 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormValues) => {
     try {
       setIsLoading(true)
-      
+
       // Call signIn with redirect: true to let NextAuth handle the redirect
       // The redirect callback in auth.ts will determine the correct dashboard URL
       const result = await signIn('credentials', {
@@ -55,7 +55,6 @@ export default function LoginPage() {
       })
 
       // If we reach here, something went wrong (signIn with redirect: true shouldn't return)
-      console.log('SignIn returned unexpectedly:', result)
       toast.error('Invalid email or password')
       setIsLoading(false)
     } catch (error) {
@@ -79,13 +78,7 @@ export default function LoginPage() {
         <div className="text-center mb-6 sm:mb-8 md:mb-10 fade-in-cascade">
           {/* Logo */}
           <div className="flex items-center justify-center gap-2 mb-3 sm:mb-4">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-br from-blue-500 via-blue-600 to-violet-600 flex items-center justify-center shadow-lg">
-              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4z" />
-                <path fillRule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zm11-4a1 1 0 10-2 0 1 1 0 002 0z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <span className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 via-blue-500 to-violet-600 bg-clip-text text-transparent">Financial Panel</span>
+            <span className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 via-blue-500 to-violet-600 bg-clip-text text-transparent">Financial Flow Monitor</span>
           </div>
           
           <h1 className="welcome-header text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">Welcome back!</h1>
@@ -174,8 +167,41 @@ export default function LoginPage() {
               </form>
             </Form>
 
-            {/* Sign up link */}
-            <div className="text-center pt-2 sm:pt-4">
+            {/* Sign up link and forgot password */}
+            <div className="text-center pt-2 sm:pt-4 space-y-2">
+              <button
+                type="button"
+                onClick={async () => {
+                  const email = form.getValues('email')
+                  if (!email) {
+                    toast.error('Please enter your email address')
+                    return
+                  }
+
+                  try {
+                    const response = await fetch('/api/auth/reset-password', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ email })
+                    })
+
+                    const data = await response.json()
+
+                    if (response.ok) {
+                      toast.success(`Password reset! New password: ${data.newPassword}`)
+                    } else {
+                      toast.error(data.error || 'Password reset failed')
+                    }
+                  } catch (error) {
+                    console.error('Password reset error:', error)
+                    toast.error('Password reset failed')
+                  }
+                }}
+                className="text-xs sm:text-sm text-blue-600 hover:text-blue-800 underline"
+              >
+                Forgot Password?
+              </button>
+              
               <p className="text-xs sm:text-sm text-gray-600">
                 Don&apos;t have an account?{' '}
                 <Link href="/auth/register" className="text-blue-600 hover:text-blue-700 font-semibold transition-colors">
