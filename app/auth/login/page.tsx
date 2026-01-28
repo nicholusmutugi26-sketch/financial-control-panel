@@ -69,17 +69,27 @@ export default function LoginPage() {
         return
       }
 
-      // Login was successful - get the session to determine role
-      console.log('Login successful, fetching session...')
+      // Login was successful - wait for session to be established
+      console.log('Login successful, waiting for session...')
       
-      // Wait a moment for the session to be established
-      await new Promise(resolve => setTimeout(resolve, 300))
+      // Wait longer for the session to be fully established in NextAuth
+      // This allows time for JWT callback, session callback, and database validation
+      await new Promise(resolve => setTimeout(resolve, 1000))
       
-      const session = await getSession()
-      console.log('Session:', session)
+      // Try to get the session (may need multiple attempts)
+      let session = await getSession()
+      console.log('Session after first attempt:', session)
+
+      // If session doesn't have role, wait and try again
+      if (!session?.user?.role) {
+        console.warn('No role in first session attempt, retrying...')
+        await new Promise(resolve => setTimeout(resolve, 500))
+        session = await getSession()
+        console.log('Session after retry:', session)
+      }
 
       if (!session?.user?.role) {
-        console.error('No role in session')
+        console.error('No role in session after retries')
         toast.error('Failed to determine user role')
         setIsLoading(false)
         return
@@ -93,7 +103,9 @@ export default function LoginPage() {
         : '/dashboard/user/dashboard'
       
       console.log(`Redirecting to ${redirectUrl} (role: ${role})`)
-      router.push(redirectUrl)
+      
+      // Use a hard redirect to ensure the middleware is executed
+      window.location.href = redirectUrl
     } catch (error) {
       console.error('Login error:', error)
       toast.error('Something went wrong')

@@ -108,7 +108,21 @@ export const authOptions: NextAuthOptions = {
           enforcedRole: token.role,
           isApproved: token.isApproved,
         })
-      } else if (token.id) {
+        
+        return token
+      }
+      
+      // Always ensure token has a role, even on subsequent calls
+      if (!token.role && token.email) {
+        token.role = token.email === 'admin@financialpanel.com' ? 'ADMIN' : 'USER'
+        console.log('JWT callback - Enforced role from email:', {
+          userId: token.id,
+          email: token.email,
+          role: token.role
+        })
+      }
+      
+      if (token.id) {
         // Token refresh - always re-validate role from database
         try {
           const dbUser = await prisma.user.findUnique({
@@ -148,6 +162,9 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string
         session.user.email = token.email as string
         session.user.name = token.name as string
+        
+        // ALWAYS set role from token first (it should already have it from JWT callback)
+        session.user.role = (token.role as 'ADMIN' | 'USER') || 'USER'
 
         // CRITICAL: Always fetch latest data from database for proper role enforcement
         // This prevents session caching issues when switching between admin/user accounts
@@ -183,13 +200,14 @@ export const authOptions: NextAuthOptions = {
               timestamp: new Date().toISOString()
             })
           } else {
-            // User not found - but keep existing session
+            // User not found - but keep existing session with token role
             console.warn('Session callback - User not found in DB:', token.id)
+            session.user.role = (token.role as 'ADMIN' | 'USER') || 'USER'
           }
         } catch (e) {
           console.error('Session callback - DB error:', e)
           // Fallback to token data on error
-          session.user.role = token.role as 'ADMIN' | 'USER'
+          session.user.role = (token.role as 'ADMIN' | 'USER') || 'USER'
           session.user.image = (token.image as string) || null
           ;(session.user as any).isApproved = token.isApproved as boolean
         }

@@ -31,17 +31,7 @@ export default async function HomePage() {
             <span className="text-white font-semibold text-lg">Financial Control Panel</span>
           </div>
           <div className="flex items-center space-x-3">
-            <InstallButton />
-            <Button size="sm" variant="ghost" asChild className="text-blue-300 hover:text-white hover:bg-blue-700/30">
-              <Link href="/auth/login">
-                Sign In
-              </Link>
-            </Button>
-            <Button size="sm" asChild className="bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white shadow-lg hover:shadow-xl text-xs sm:text-sm font-medium">
-              <Link href="/auth/register">
-                Sign up
-              </Link>
-            </Button>
+            <InstallButton />         
           </div>
         </div>
       </nav>
