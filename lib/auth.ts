@@ -68,10 +68,15 @@ export const authOptions: NextAuthOptions = {
             throw new Error("Invalid password")
           }
 
-          // Update last login
+          // Update last login and auto-approve users on first login
+          // This allows users to access the dashboard immediately
+          const isAdmin = user.email === 'admin@financialpanel.com'
           await prisma.user.update({
             where: { id: user.id },
-            data: { lastLogin: new Date() }
+            data: { 
+              lastLogin: new Date(),
+              isApproved: true // Auto-approve all users on successful login
+            }
           })
 
           return {
