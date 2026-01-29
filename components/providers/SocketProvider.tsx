@@ -35,13 +35,20 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       return
     }
 
+    // Skip socket connection if we're on production/Vercel (doesn't work with localhost URL)
+    // Socket.IO will be re-enabled once configured properly for production
+    if (process.env.NODE_ENV === 'production') {
+      console.log('[Socket.IO] ℹ Socket.IO disabled on production - using polling instead')
+      return
+    }
+
     // Only attempt connection once per session
     if (connectionAttempted && socket) {
       console.log('[Socket.IO] Already connected with active socket')
       return
     }
 
-    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3000'
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
     
     console.log('[Socket.IO] Starting connection attempt', {
       url: socketUrl,

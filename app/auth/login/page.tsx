@@ -59,16 +59,16 @@ export default function LoginPage() {
       setIsLoading(true)
       console.log('Attempting login for:', data.email)
 
-      // Use redirect: false to handle response ourselves
+      // Use NextAuth's signIn with redirect: true for automatic handling
+      // This ensures the session is properly established before any redirect
       const result = await signIn('credentials', {
         email: data.email,
         password: data.password,
-        redirect: false, // Handle redirect manually
+        redirect: true, // Let NextAuth handle redirect
+        callbackUrl: '/dashboard', // Where to redirect after login
       })
 
-      console.log('SignIn result:', result)
-
-      // If there's an error, show it
+      // If signIn returned (only if redirect: false), we have an error
       if (!result?.ok || result?.error) {
         console.error('Login failed:', result?.error)
         toast.error('Invalid email or password')
@@ -76,26 +76,8 @@ export default function LoginPage() {
         return
       }
 
-      // Login successful - show success message
-      console.log('Login successful for:', data.email)
-      toast.success('Logged in successfully')
-
-      // Use window.location.href for a full page reload
-      // This ensures:
-      // 1. The session cookie is sent to the server
-      // 2. NextAuth completes the session establishment
-      // 3. The dashboard can properly read and validate the session
-      // 4. Middleware can check the token before loading /dashboard
-      console.log('Performing full page redirect to dashboard')
-      
-      // Wait just long enough for NextAuth to write the session cookie
-      // But not so long that the user sees a delay
-      setTimeout(() => {
-        // Clear the form to prevent re-submission
-        form.reset()
-        // Full page reload ensures cookies are sent to server
-        window.location.href = '/dashboard'
-      }, 300) // Reduced from 500ms based on cookie timing
+      // signIn will redirect automatically, so we shouldn't reach here
+      console.log('SignIn completed, redirecting...')
     } catch (error) {
       console.error('Login error:', error)
       toast.error('Something went wrong')
