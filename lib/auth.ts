@@ -158,109 +158,100 @@ export const authOptions: NextAuthOptions = {
       return token
     },
     async session({ session, token }) {
-      if (session.user && token) {
-        // SAFETY FIRST: Always ensure these basic fields exist
-        session.user.id = token.id as string
-        session.user.email = token.email as string
-        session.user.name = token.name as string
-        
-        // ALWAYS set role from token first
-        session.user.role = (token.role as 'ADMIN' | 'USER') || 'USER'
-        
-        // ALWAYS initialize isApproved from token (default is false)
-        ;(session.user as any).isApproved = token.isApproved === true // Explicit true check
+      console.log('[SESSION CALLBACK] Starting...', {
+        hasSession: !!session,
+        hasToken: !!token,
+        tokenId: token?.id,
+        tokenEmail: token?.email,
+        tokenRole: token?.role,
+        tokenIsApproved: token?.isApproved,
+      })
 
-        console.log('Session callback START:', {
-          userId: session.user.id,
-          email: session.user.email,
-          tokenRole: token.role,
-          tokenIsApproved: token.isApproved,
-          timestamp: new Date().toISOString()
-        })
-
-        // CRITICAL: Always fetch latest data from database for proper role enforcement
-        // This prevents session caching issues when switching between admin/user accounts
-        try {
-          const dbUser = await prisma.user.findUnique({
-            where: { id: token.id as string },
-            select: { 
-              email: true,
-              name: true,
-              isApproved: true,
-              profileImage: true,
-              role: true
-            },
-          })
-
-          if (dbUser) {
-            // SECURITY: Role is ALWAYS determined by email, never by stored role
-            // This is critical for switching accounts without cache issues
-            const enforcedRole = dbUser.email === 'admin@financialpanel.com' ? 'ADMIN' : 'USER'
-            
-            session.user.role = enforcedRole
-            session.user.email = dbUser.email
-            session.user.name = dbUser.name || session.user.name
-            session.user.image = dbUser.profileImage || (token.image as string) || null
-            ;(session.user as any).isApproved = dbUser.isApproved === true // Explicit true check
-
-            console.log('Session callback SUCCESS - DB refresh:', {
-              userId: session.user.id,
-              email: dbUser.email,
-              dbRole: dbUser.role,
-              enforcedRole: enforcedRole,
-              isApproved: dbUser.isApproved,
-              timestamp: new Date().toISOString()
-            })
-          } else {
-            // User not found in DB - FALLBACK to token values
-            console.warn('Session callback - User not found in DB, using token values:', {
-              userId: token.id,
-              tokenRole: token.role,
-              tokenIsApproved: token.isApproved
-            })
-            session.user.role = (token.role as 'ADMIN' | 'USER') || 'USER'
-            ;(session.user as any).isApproved = token.isApproved === true // Explicit true check
-          }
-        } catch (e) {
-          // DB error - FALLBACK to token values (critical for session to work)
-          console.error('Session callback - DB error:', e)
-          console.warn('Session callback - Using token values as fallback:', {
-            userId: token.id,
-            tokenRole: token.role,
-            tokenIsApproved: token.isApproved,
-            error: (e as Error).message
-          })
-          // Keep the values from token - this is critical to prevent session failure
-          session.user.role = (token.role as 'ADMIN' | 'USER') || 'USER'
-          session.user.image = (token.image as string) || null
-          ;(session.user as any).isApproved = token.isApproved === true // Explicit true check
-        }
-
-        // FINAL SAFETY CHECK: Ensure role is valid
-        if (!session.user.role || (session.user.role !== 'ADMIN' && session.user.role !== 'USER')) {
-          console.error('Session callback - INVALID ROLE, forcing USER:', {
-            userId: session.user.id,
-            invalidRole: session.user.role
-          })
-          session.user.role = 'USER'
-        }
-
-        // Ensure isApproved is boolean
-        if (typeof (session.user as any).isApproved !== 'boolean') {
-          (session.user as any).isApproved = false
-        }
-
-        console.log('Session callback END:', {
-          userId: session.user.id,
-          email: session.user.email,
-          finalRole: session.user.role,
-          finalIsApproved: (session.user as any).isApproved,
-          timestamp: new Date().toISOString()
-        })
-      } else {
-        // Invalid session - should not happen
-        console.error('Session callback - Invalid session/token combination')
+      if (!session || !session.user || !token) {
+        console.error('[SESSION CALLBACK] ❌ Invalid session/token:', { hasSession: !!session, hasToken: !!token })
+        return session
       }
+
+      // STEP 1: Initialize user fields from token
+      session.user.id = token.id as string
+      session.user.email = token.email as string
+      session.user.name = token.name as string
+      session.user.role = (token.role as 'ADMIN' | 'USER') || 'USER'
+      ;(session.user as any).isApproved = token.isApproved === true
+
+      console.log('[SESSION CALLBACK] Step 1 - Initialized from token:', {
+        userId: session.user.id,
+        email: session.user.email,
+        role: session.user.role,
+        isApproved: (session.user as any).isApproved,
+      })
+
+      // STEP 2: Fetch latest data from database
+      try {
+        console.log('[SESSION CALLBACK] Step 2 - Fetching from database...')
+        
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.id as string },
+          select: { 
+            email: true,
+            name: true,
+            isApproved: true,
+            profileImage: true,
+            role: true
+          },
+        })
+
+        if (dbUser) {
+          console.log('[SESSION CALLBACK] ✓ Found user in DB:', {
+            email: dbUser.email,
+            role: dbUser.role,
+            isApproved: dbUser.isApproved,
+          })
+
+          // Always enforce role based on email
+          const enforcedRole = dbUser.email === 'admin@financialpanel.com' ? 'ADMIN' : 'USER'
+          
+          session.user.role = enforcedRole
+          session.user.email = dbUser.email
+          session.user.name = dbUser.name || session.user.name
+          session.user.image = dbUser.profileImage || (token.image as string) || null
+          ;(session.user as any).isApproved = dbUser.isApproved === true
+
+          console.log('[SESSION CALLBACK] ✓ Step 2 - Updated from DB:', {
+            role: enforcedRole,
+            isApproved: (session.user as any).isApproved,
+          })
+        } else {
+          console.warn('[SESSION CALLBACK] ⚠️  User not found in DB, using token values')
+          session.user.role = (token.role as 'ADMIN' | 'USER') || 'USER'
+          ;(session.user as any).isApproved = token.isApproved === true
+        }
+      } catch (dbError) {
+        console.error('[SESSION CALLBACK] ❌ DB error:', (dbError as Error).message)
+        // Keep values from token
+        session.user.role = (token.role as 'ADMIN' | 'USER') || 'USER'
+        session.user.image = (token.image as string) || null
+        ;(session.user as any).isApproved = token.isApproved === true
+      }
+
+      // STEP 3: Final validation
+      if (!session.user.role || (session.user.role !== 'ADMIN' && session.user.role !== 'USER')) {
+        console.error('[SESSION CALLBACK] ❌ Invalid role, forcing USER')
+        session.user.role = 'USER'
+      }
+
+      if (typeof (session.user as any).isApproved !== 'boolean') {
+        console.error('[SESSION CALLBACK] ❌ Invalid isApproved, forcing false')
+        ;(session.user as any).isApproved = false
+      }
+
+      console.log('[SESSION CALLBACK] ✓ Completed successfully:', {
+        userId: session.user.id,
+        email: session.user.email,
+        role: session.user.role,
+        isApproved: (session.user as any).isApproved,
+      })
+
       return session
     },
     async redirect({ url, baseUrl }) {
