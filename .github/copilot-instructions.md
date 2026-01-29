@@ -4,12 +4,14 @@ Short, actionable guidance for an AI coding agent to become productive in this r
 
 Quick Architecture Summary
 --------------------------
-- Framework: Next.js 14 (App Router). Top-level routes live under `app/` and are server components by default.
-- Global layout: [app/layout.tsx](app/layout.tsx) composes `Providers` and the `Toaster`.
-- Providers: [components/providers/Providers.tsx](components/providers/Providers.tsx) wires `next-auth` `SessionProvider`, a `QueryClient` and `SocketProvider` (client component).
-- API: Route handlers are Next route handlers under `app/api/*`. Server DB access happens in these route handlers.
-- Database: PostgreSQL with Prisma ORM. Use singleton from [lib/prisma.ts](lib/prisma.ts).
-- Realtime: Socket.io server at [lib/realtime.ts](lib/realtime.ts), client in [components/providers/SocketProvider.tsx](components/providers/SocketProvider.tsx).
+- **Framework**: Next.js 14.2 (App Router) with RSC by default. Routes under `app/`, config in [next.config.js](next.config.js).
+- **Global layout**: [app/layout.tsx](app/layout.tsx) composes `Providers` (SessionProvider, QueryClient, SocketProvider) and Sonner `Toaster`.
+- **Providers**: [components/providers/Providers.tsx](components/providers/Providers.tsx) (server) + [components/providers/SocketProvider.tsx](components/providers/SocketProvider.tsx) (client).
+- **API routes**: Next.js route handlers under `app/api/*`. All DB operations are server-side; always validate `getServerSession(authOptions)` first.
+- **Database**: Supabase PostgreSQL via Prisma ORM. Use singleton from [lib/prisma.ts](lib/prisma.ts); always wrap multi-step ops in `prisma.$transaction()`.
+- **Realtime**: Socket.io server at [lib/realtime.ts](lib/realtime.ts) (initialized on first request via pages/api/socket.ts). 
+  - **CRITICAL**: Socket.IO is **disabled on production** (Vercel) due to localhost URL mismatch. Client falls back to polling via React Query.
+  - Production deployments use polling; Socket.IO only for local development.
 
 Key Architecture Patterns
 -------------------------
@@ -17,6 +19,9 @@ Key Architecture Patterns
 - **Expenditures reference budget items**: Create `ExpenditureItem` rows with `spentAmount`. Server validates ownership. See [app/api/expenditures/route.ts](app/api/expenditures/route.ts).
 - **Supplementary budgets**: When `spentAmount` > budget item price, create `SupplementaryBudget` (status PENDING) not instant approval. See [app/api/expenditures/route.ts](app/api/expenditures/route.ts).
 - **Fund pool & remittances**: Admins manage `SystemSetting` key `fund_pool_balance`. Users submit `Remittance` records, admins verify to credit pool. See [app/api/remittances/route.ts](app/api/remittances/route.ts).
+- **Email normalization is critical**: All email comparisons must be case-insensitive. Use `.toLowerCase()` before DB lookups and comparisons. See [lib/auth.ts](lib/auth.ts) lines 60-67 for pattern.
+- **Role enforcement is hardcoded**: Role is derived from email (`admin@financialpanel.com` = ADMIN, all others = USER), NOT stored. Set in JWT callback [lib/auth.ts](lib/auth.ts) lines 130-132 and middleware [middleware.ts](middleware.ts) lines 30-31.
+- **Middleware enforces access control**: All dashboard routes checked in [middleware.ts](middleware.ts) by role and approval status. Admin routes require ADMIN role; user routes require USER role and isApproved=true.
 
 Data & Realtime
 ---------------
@@ -29,9 +34,10 @@ Data & Realtime
 
 Type System & Nullability
 --------------------------
-- **Nullable fields**: `user.name`, `user.role`, `status`, `priority` can be `string | null`. Always coalesce: `{name || 'Unknown'}`, `getStatusColor(status || 'PENDING')`.
+- **Nullable fields**: `user.name`, `user.role` (stored as string, role enforced via email), `status`, `priority` can be `string | null`. Always coalesce: `{name || 'Unknown'}`, `getStatusColor(status || 'PENDING')`.
 - **Date handling**: Fields can be `Date | string`. Use `formatTime(dateInput: Date | string)` helper.
-- **Session user**: Access via `session?.user?.id`, `session?.user?.role` (both can be null in edge cases).
+- **Session user**: Access via `session?.user?.id`, `session?.user?.email` (can be null in edge cases). Always check before using.
+- **Email null safety**: Before `.toLowerCase()`, use `(email ?? '').toLowerCase()` to prevent runtime errors. This pattern is used throughout auth flows.
 - **TypeScript**: Project uses strict mode. Cast only when necessary (e.g., `as any` for Prisma adapter incompatibilities).
 
 Developer Workflows
@@ -41,6 +47,18 @@ Developer Workflows
 - **Build**: `npm run build` (full production build with type checking). Always run before deployment.
 - **Tests**: `npm run test` (Vitest).
 - **Lint**: `npm run lint`.
+- **Email normalization workflow**: When adding auth endpoints, ALWAYS normalize emails to lowercase: `const normalizedEmail = (email ?? '').toLowerCase()`.
+- **Database queries on production**: Use case-insensitive Prisma filters: `findFirst({ where: { email: { equals: email, mode: 'insensitive' } } })` NOT `findUnique()`.
+
+Authentication Critical Patterns (Lessons from Production Debugging)
+---------------------------------------------------------------------
+- **Email case-insensitivity is non-negotiable**: Supabase unique indexes are case-sensitive by default. All email lookups must use `mode: 'insensitive'` or lowercase normalization. Missing this breaks production login.
+- **NextAuth authorize() must log extensively**: Add 🔐 [AUTH] emoji-prefixed logs at each step (credentials received, schema validation, user lookup, password comparison). If users can't login, these logs are the ONLY way to diagnose.
+- **Role is derived, not stored**: Email drives role in `lib/auth.ts` lines 130-132 (`admin@financialpanel.com` → ADMIN, else → USER). Do NOT add a stored `role` field to User table or role enforcement breaks.
+- **Session validation in middleware is strict**: `middleware.ts` enforces ADMIN/USER roles and `isApproved` status. Non-approved users cannot access dashboard (see lines 33-36 for pattern).
+- **Production Socket.IO must be disabled**: Vercel runs on shared domains; localhost:3000 WebSocket fails. Check `process.env.NODE_ENV === 'production'` in `SocketProvider.tsx` (line 43). Production uses polling instead.
+- **NextAuth redirect strategy**: Use `redirect: true` in `signIn()` calls to let NextAuth handle redirects automatically (avoids manual `window.location.href` complexities).
+- **Password validation with bcrypt**: Always compare using `bcrypt.compare(plaintext, hash)` after user lookup. Validate hash exists before comparison (see `lib/auth.ts` line 82 pattern).
 
 Codebase Conventions & Gotchas
 ------------------------------
@@ -50,6 +68,9 @@ Codebase Conventions & Gotchas
 - **Null coalescing pattern**: Widely used—e.g., `getStatusColor(budget.status || 'PENDING')`, `{user.name || 'User'}`, `(user.role || 'USER')`.
 - **Metadata JSON field**: Use spread with cast: `...transaction.metadata as any || {}` (Prisma Json type isn't plain object).
 - **Exclude worktrees**: [tsconfig.json](tsconfig.json) excludes `fcp` and `fcp.worktrees` folders to prevent build pollution.
+- **Email comparisons**: ALWAYS use `(email ?? '').toLowerCase() === 'admin@financialpanel.com'` pattern (null guard + lowercase). Single mistake breaks auth flow.
+- **API request validation**: Use Zod schemas (e.g., `createExpenditureSchema`) for request body validation before DB operations. Always validate session first with `getServerSession()`.
+- **Prisma transactions for multi-step ops**: ANY operation touching multiple tables must use `prisma.$transaction(async (tx) => {...})` to prevent partial writes and ensure consistency.
 
 Key Files to Inspect
 --------------------
