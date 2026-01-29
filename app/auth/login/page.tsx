@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { signIn } from 'next-auth/react'
+import { signIn, getSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import Link from 'next/link'
@@ -78,16 +78,51 @@ export default function LoginPage() {
         return
       }
 
-      // signIn succeeded, now wait for session to be established
+      // signIn succeeded, now wait for session to be established and route by role
       console.log('📱 [LOGIN] ✓ Credentials valid, waiting for session...')
-      
-      // Give NextAuth time to set the session cookie
-      await new Promise(resolve => setTimeout(resolve, 100))
 
-      // Now redirect to dashboard - NextAuth will handle the session
-      console.log('📱 [LOGIN] ✓ Redirecting to dashboard')
+      // Poll for session up to 2 seconds
+      const maxWait = 2000
+      const interval = 200
+      let waited = 0
+      let session: any = null
+
+      while (waited < maxWait) {
+        // Fetch the session from NextAuth
+        // eslint-disable-next-line no-await-in-loop
+        session = await getSession()
+        if (session && session.user) break
+        // eslint-disable-next-line no-await-in-loop
+        await new Promise((r) => setTimeout(r, interval))
+        waited += interval
+      }
+
+      if (!session || !session.user) {
+        console.error('📱 [LOGIN] ❌ Session not established after signIn')
+        toast.error('Login succeeded but session not ready. Please try again.')
+        setIsLoading(false)
+        return
+      }
+
+      // Route based on role and approval
+      const role = (session.user.role || 'USER').toUpperCase()
+      const isApproved = !!(session.user?.isApproved)
+
       toast.success('Logged in successfully')
-      router.push('/dashboard')
+      console.log('📱 [LOGIN] ✓ Session ready, role:', role, 'isApproved:', isApproved)
+
+      if (!isApproved) {
+        router.push('/dashboard/pending-approval')
+        return
+      }
+
+      if (role === 'ADMIN') {
+        router.push('/dashboard/admin/dashboard')
+        return
+      }
+
+      // Default to user dashboard
+      router.push('/dashboard/user/dashboard')
     } catch (error) {
       console.error('📱 [LOGIN] ❌ Login error:', error)
       toast.error('Something went wrong')
