@@ -56,9 +56,9 @@ export const authOptions: NextAuthOptions = {
           const validatedCredentials = loginSchema.parse(credentials)
           console.log('🔐 [AUTH] ✓ Credentials validated:', { email: validatedCredentials.email })
 
-          // Find user by email (case-insensitive)
-          const user = await prisma.user.findUnique({
-            where: { email: validatedCredentials.email.toLowerCase() }
+          // Find user by email using case-insensitive filter
+          const user = await prisma.user.findFirst({
+            where: { email: { equals: validatedCredentials.email, mode: 'insensitive' } }
           })
 
           if (!user) {
@@ -98,7 +98,7 @@ export const authOptions: NextAuthOptions = {
             id: user.id,
             email: user.email,
             name: user.name,
-            role: (user.email === 'admin@financialpanel.com' ? 'ADMIN' : 'USER') as 'ADMIN' | 'USER',
+            role: ((user.email ?? '').toLowerCase() === 'admin@financialpanel.com' ? 'ADMIN' : 'USER') as 'ADMIN' | 'USER',
             isApproved: user.isApproved,
             image: user.profileImage,
           } as any
@@ -124,7 +124,7 @@ export const authOptions: NextAuthOptions = {
         if ((user as any).image) token.image = (user as any).image
 
         // CRITICAL: Always enforce role based on email, never trust user input
-        token.role = user.email === 'admin@financialpanel.com' ? 'ADMIN' : 'USER'
+        token.role = ((user.email ?? '').toLowerCase() === 'admin@financialpanel.com' ? 'ADMIN' : 'USER')
 
         console.log('JWT callback - Initial login:', {
           userId: token.id,
@@ -138,7 +138,7 @@ export const authOptions: NextAuthOptions = {
       
       // Always ensure token has a role, even on subsequent calls
       if (!token.role && token.email) {
-        token.role = token.email === 'admin@financialpanel.com' ? 'ADMIN' : 'USER'
+        token.role = (token.email as string).toLowerCase() === 'admin@financialpanel.com' ? 'ADMIN' : 'USER'
         console.log('JWT callback - Enforced role from email:', {
           userId: token.id,
           email: token.email,
@@ -156,7 +156,7 @@ export const authOptions: NextAuthOptions = {
 
           if (dbUser) {
             // SECURITY: Role is ALWAYS determined by email, never by stored role
-            const enforcedRole = dbUser.email === 'admin@financialpanel.com' ? 'ADMIN' : 'USER'
+            const enforcedRole = ((dbUser.email ?? '').toLowerCase() === 'admin@financialpanel.com' ? 'ADMIN' : 'USER')
 
             token.role = enforcedRole
             token.isApproved = dbUser.isApproved
@@ -233,8 +233,8 @@ export const authOptions: NextAuthOptions = {
           })
 
           // Always enforce role based on email
-          const enforcedRole = dbUser.email === 'admin@financialpanel.com' ? 'ADMIN' : 'USER'
-          
+          const enforcedRole = ((dbUser.email ?? '').toLowerCase() === 'admin@financialpanel.com' ? 'ADMIN' : 'USER')
+
           session.user.role = enforcedRole
           session.user.email = dbUser.email
           session.user.name = dbUser.name || session.user.name
