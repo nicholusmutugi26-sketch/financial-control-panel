@@ -14,13 +14,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 })
     }
 
+    // Normalize email to lowercase
+    const normalizedEmail = email.toLowerCase()
+
     // Demo password for testing
     const demoPassword = 'demo123456'
     const hashedPassword = await bcrypt.hash(demoPassword, 12)
 
     // Update user password
     const result = await prisma.user.updateMany({
-      where: { email: email },
+      where: { email: normalizedEmail },
       data: { password: hashedPassword }
     })
 
@@ -32,7 +35,7 @@ export async function POST(req: Request) {
       success: true,
       message: 'Password reset successfully',
       newPassword: demoPassword,
-      email: email
+      email: normalizedEmail
     })
   } catch (error) {
     console.error('Password reset error:', error)

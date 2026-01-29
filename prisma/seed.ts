@@ -6,7 +6,7 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('Seeding database...')
 
-  // Create Admin User
+  // Create Admin User with lowercase email
   const adminPassword = await bcrypt.hash('admin@financialpanel@2026', 12)
   const admin = await prisma.user.upsert({
     where: { email: 'admin@financialpanel.com' },

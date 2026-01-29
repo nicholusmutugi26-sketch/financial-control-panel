@@ -57,12 +57,13 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormValues) => {
     try {
       setIsLoading(true)
-      console.log('Attempting login for:', data.email)
+      const lowercaseEmail = data.email.toLowerCase()
+      console.log('📱 [LOGIN] Attempting login for:', lowercaseEmail)
 
       // Use NextAuth's signIn with redirect: true for automatic handling
       // This ensures the session is properly established before any redirect
       const result = await signIn('credentials', {
-        email: data.email,
+        email: lowercaseEmail,
         password: data.password,
         redirect: true, // Let NextAuth handle redirect
         callbackUrl: '/dashboard', // Where to redirect after login
@@ -70,16 +71,16 @@ export default function LoginPage() {
 
       // If signIn returned (only if redirect: false), we have an error
       if (!result?.ok || result?.error) {
-        console.error('Login failed:', result?.error)
+        console.error('📱 [LOGIN] ❌ Login failed:', result?.error)
         toast.error('Invalid email or password')
         setIsLoading(false)
         return
       }
 
       // signIn will redirect automatically, so we shouldn't reach here
-      console.log('SignIn completed, redirecting...')
+      console.log('📱 [LOGIN] ✓ SignIn completed, redirecting...')
     } catch (error) {
-      console.error('Login error:', error)
+      console.error('📱 [LOGIN] ❌ Login error:', error)
       toast.error('Something went wrong')
       setIsLoading(false)
     }

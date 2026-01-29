@@ -45,28 +45,48 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         try {
-          const validatedCredentials = loginSchema.parse(credentials)
+          console.log('🔐 [AUTH] authorize() called with credentials:', credentials ? { email: credentials.email, passwordLength: (credentials.password || '').length } : 'none')
+          
+          // Validate credentials structure
+          if (!credentials) {
+            console.error('🔐 [AUTH] ❌ No credentials provided')
+            return null
+          }
 
+          const validatedCredentials = loginSchema.parse(credentials)
+          console.log('🔐 [AUTH] ✓ Credentials validated:', { email: validatedCredentials.email })
+
+          // Find user by email (case-insensitive)
           const user = await prisma.user.findUnique({
-            where: { email: validatedCredentials.email }
+            where: { email: validatedCredentials.email.toLowerCase() }
           })
 
           if (!user) {
-            throw new Error("No user found with this email")
+            console.error('🔐 [AUTH] ❌ User not found:', validatedCredentials.email)
+            return null
           }
 
-          if (!user.password) {
-            throw new Error("User password not set")
+          console.log('🔐 [AUTH] ✓ User found:', { id: user.id, email: user.email, hasPassword: !!user.password })
+
+          // Ensure password is set
+          if (!user.password || user.password.trim() === '') {
+            console.error('🔐 [AUTH] ❌ User password not set for:', user.email)
+            return null
           }
 
+          // Compare passwords
+          console.log('🔐 [AUTH] Comparing passwords...')
           const isValidPassword = await bcrypt.compare(
             validatedCredentials.password,
             user.password
           )
 
           if (!isValidPassword) {
-            throw new Error("Invalid password")
+            console.error('🔐 [AUTH] ❌ Invalid password for:', user.email)
+            return null
           }
+
+          console.log('🔐 [AUTH] ✓ Password valid')
 
           // Update last login
           await prisma.user.update({
@@ -74,7 +94,7 @@ export const authOptions: NextAuthOptions = {
             data: { lastLogin: new Date() }
           })
 
-          return {
+          const returnUser = {
             id: user.id,
             email: user.email,
             name: user.name,
@@ -82,8 +102,12 @@ export const authOptions: NextAuthOptions = {
             isApproved: user.isApproved,
             image: user.profileImage,
           } as any
+
+          console.log('🔐 [AUTH] ✓ User authorized successfully:', { id: returnUser.id, email: returnUser.email, role: returnUser.role })
+          return returnUser
         } catch (error) {
-          console.error("Auth error:", error)
+          console.error('🔐 [AUTH] ❌ Authorization error:', error instanceof Error ? error.message : error)
+          console.error('🔐 [AUTH] Full error:', error)
           return null
         }
       }
