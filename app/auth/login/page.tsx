@@ -112,17 +112,19 @@ export default function LoginPage() {
       console.log('📱 [LOGIN] ✓ Session ready, role:', role, 'isApproved:', isApproved)
 
       if (!isApproved) {
-        router.push('/dashboard/pending-approval')
+        // Use full navigation to avoid client/server redirect race
+        window.location.assign('/dashboard/pending-approval')
         return
       }
 
       if (role === 'ADMIN') {
-        router.push('/dashboard/admin/dashboard')
+        // Force a full page load so the server-side middleware sees the established session
+        window.location.assign('/dashboard/admin/dashboard')
         return
       }
 
-      // Default to user dashboard
-      router.push('/dashboard/user/dashboard')
+      // Default to user dashboard - use full navigation
+      window.location.assign('/dashboard/user/dashboard')
     } catch (error) {
       console.error('📱 [LOGIN] ❌ Login error:', error)
       toast.error('Something went wrong')
