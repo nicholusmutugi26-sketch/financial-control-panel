@@ -68,15 +68,10 @@ export const authOptions: NextAuthOptions = {
             throw new Error("Invalid password")
           }
 
-          // Update last login and auto-approve users on first login
-          // This allows users to access the dashboard immediately
-          const isAdmin = user.email === 'admin@financialpanel.com'
+          // Update last login
           await prisma.user.update({
             where: { id: user.id },
-            data: { 
-              lastLogin: new Date(),
-              isApproved: true // Auto-approve all users on successful login
-            }
+            data: { lastLogin: new Date() }
           })
 
           return {
@@ -169,13 +164,17 @@ export const authOptions: NextAuthOptions = {
         session.user.email = token.email as string
         session.user.name = token.name as string
         
-        // ALWAYS set role from token first (it should already have it from JWT callback)
+        // ALWAYS set role from token first
         session.user.role = (token.role as 'ADMIN' | 'USER') || 'USER'
+        
+        // ALWAYS initialize isApproved from token (default is false)
+        ;(session.user as any).isApproved = token.isApproved === true // Explicit true check
 
         console.log('Session callback START:', {
           userId: session.user.id,
           email: session.user.email,
           tokenRole: token.role,
+          tokenIsApproved: token.isApproved,
           timestamp: new Date().toISOString()
         })
 
@@ -191,7 +190,6 @@ export const authOptions: NextAuthOptions = {
               profileImage: true,
               role: true
             },
-            // Add timeout to prevent hanging
           })
 
           if (dbUser) {
@@ -203,7 +201,7 @@ export const authOptions: NextAuthOptions = {
             session.user.email = dbUser.email
             session.user.name = dbUser.name || session.user.name
             session.user.image = dbUser.profileImage || (token.image as string) || null
-            ;(session.user as any).isApproved = dbUser.isApproved
+            ;(session.user as any).isApproved = dbUser.isApproved === true // Explicit true check
 
             console.log('Session callback SUCCESS - DB refresh:', {
               userId: session.user.id,
@@ -214,25 +212,28 @@ export const authOptions: NextAuthOptions = {
               timestamp: new Date().toISOString()
             })
           } else {
-            // User not found in DB - FALLBACK to token role
-            console.warn('Session callback - User not found in DB, using token role:', {
+            // User not found in DB - FALLBACK to token values
+            console.warn('Session callback - User not found in DB, using token values:', {
               userId: token.id,
-              tokenRole: token.role
+              tokenRole: token.role,
+              tokenIsApproved: token.isApproved
             })
             session.user.role = (token.role as 'ADMIN' | 'USER') || 'USER'
+            ;(session.user as any).isApproved = token.isApproved === true // Explicit true check
           }
         } catch (e) {
-          // DB error - FALLBACK to token role (critical for session to work)
+          // DB error - FALLBACK to token values (critical for session to work)
           console.error('Session callback - DB error:', e)
-          console.warn('Session callback - Using token role as fallback:', {
+          console.warn('Session callback - Using token values as fallback:', {
             userId: token.id,
             tokenRole: token.role,
+            tokenIsApproved: token.isApproved,
             error: (e as Error).message
           })
-          // Keep the role from token - this is critical to prevent session failure
+          // Keep the values from token - this is critical to prevent session failure
           session.user.role = (token.role as 'ADMIN' | 'USER') || 'USER'
           session.user.image = (token.image as string) || null
-          ;(session.user as any).isApproved = token.isApproved as boolean
+          ;(session.user as any).isApproved = token.isApproved === true // Explicit true check
         }
 
         // FINAL SAFETY CHECK: Ensure role is valid
@@ -244,10 +245,16 @@ export const authOptions: NextAuthOptions = {
           session.user.role = 'USER'
         }
 
+        // Ensure isApproved is boolean
+        if (typeof (session.user as any).isApproved !== 'boolean') {
+          (session.user as any).isApproved = false
+        }
+
         console.log('Session callback END:', {
           userId: session.user.id,
           email: session.user.email,
           finalRole: session.user.role,
+          finalIsApproved: (session.user as any).isApproved,
           timestamp: new Date().toISOString()
         })
       } else {

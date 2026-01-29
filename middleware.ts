@@ -29,8 +29,9 @@ export default withAuth(
     console.log(`[MIDDLEWARE] Route check - Path: ${path}, Role: ${userRole}, IsAdmin: ${isAdmin}, IsUser: ${isUser}`)
 
     // 1. Check if user is approved (unless going to pending approval page or is admin)
-    if (!path.includes('/pending-approval') && !isAdmin && token?.isApproved === false) {
-      console.log(`[MIDDLEWARE] User ${token?.email} not approved, redirecting to pending-approval`)
+    // Note: isApproved defaults to false, so only admins skip this check
+    if (!path.includes('/pending-approval') && !isAdmin && !token?.isApproved) {
+      console.log(`[MIDDLEWARE] User ${token?.email} not approved (isApproved=${token?.isApproved}), redirecting to pending-approval`)
       return NextResponse.redirect(new URL('/dashboard/pending-approval', req.url))
     }
 
