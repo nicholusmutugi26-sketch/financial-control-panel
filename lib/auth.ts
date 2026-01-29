@@ -116,160 +116,155 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        // Initial login - set basic user info
+        // Initial login - set ALL required fields immediately
+        console.log('🔐 [JWT] Initial login - setting token:', { userId: user.id, email: user.email })
+        
         token.id = user.id
         token.email = user.email
-        token.name = user.name
-        token.isApproved = (user as any).isApproved
-        if ((user as any).image) token.image = (user as any).image
-
+        token.name = user.name || ''
+        token.image = (user as any).image || null
+        token.isApproved = (user as any).isApproved === true
+        
         // CRITICAL: Always enforce role based on email, never trust user input
-        token.role = ((user.email ?? '').toLowerCase() === 'admin@financialpanel.com' ? 'ADMIN' : 'USER')
+        const enforcedRole = ((user.email ?? '').toLowerCase() === 'admin@financialpanel.com' ? 'ADMIN' : 'USER')
+        token.role = enforcedRole
 
-        console.log('JWT callback - Initial login:', {
+        console.log('🔐 [JWT] ✓ Initial token created:', {
           userId: token.id,
           email: token.email,
-          enforcedRole: token.role,
+          role: token.role,
           isApproved: token.isApproved,
+          hasName: !!token.name,
         })
         
         return token
       }
       
-      // Always ensure token has a role, even on subsequent calls
-      if (!token.role && token.email) {
-        token.role = (token.email as string).toLowerCase() === 'admin@financialpanel.com' ? 'ADMIN' : 'USER'
-        console.log('JWT callback - Enforced role from email:', {
-          userId: token.id,
-          email: token.email,
-          role: token.role
-        })
-      }
+      // Token already exists - ensure all fields are present and valid
+      console.log('🔐 [JWT] Token refresh/subsequent call:', { tokenId: token.id, tokenEmail: token.email })
       
+      // Safety: ensure all critical fields exist
+      if (!token.id) {
+        console.error('🔐 [JWT] ❌ Token has no ID - this should never happen')
+        return token
+      }
+
+      // Always ensure email and role are set correctly
+      if (!token.email) {
+        console.error('🔐 [JWT] ❌ Token has no email')
+        return token
+      }
+
+      // Always ensure role is derived from email, not stored
+      if (!token.role || typeof token.role !== 'string') {
+        const emailBasedRole = ((token.email as string).toLowerCase() === 'admin@financialpanel.com' ? 'ADMIN' : 'USER')
+        token.role = emailBasedRole
+        console.log('🔐 [JWT] Role recomputed from email:', emailBasedRole)
+      }
+
+      // Ensure isApproved is boolean
+      if (typeof token.isApproved !== 'boolean') {
+        token.isApproved = false
+        console.log('🔐 [JWT] isApproved reset to false')
+      }
+
+      // Optionally refresh user data from database (but don't block on this)
       if (token.id) {
-        // Token refresh - always re-validate role from database
         try {
           const dbUser = await prisma.user.findUnique({
             where: { id: token.id as string },
-            select: { email: true, isApproved: true, role: true }
+            select: { email: true, isApproved: true, name: true, profileImage: true }
           })
 
           if (dbUser) {
-            // SECURITY: Role is ALWAYS determined by email, never by stored role
-            const enforcedRole = ((dbUser.email ?? '').toLowerCase() === 'admin@financialpanel.com' ? 'ADMIN' : 'USER')
-
-            token.role = enforcedRole
-            token.isApproved = dbUser.isApproved
+            // Update token with fresh data
             token.email = dbUser.email
+            token.name = dbUser.name || ''
+            token.image = dbUser.profileImage || null
+            token.isApproved = dbUser.isApproved === true
+            
+            // Always re-derive role from email
+            token.role = ((dbUser.email ?? '').toLowerCase() === 'admin@financialpanel.com' ? 'ADMIN' : 'USER')
 
-            console.log('JWT callback - Token refresh:', {
-              userId: token.id,
+            console.log('🔐 [JWT] ✓ Refreshed from DB:', {
               email: dbUser.email,
-              dbRole: dbUser.role,
-              enforcedRole: enforcedRole,
-              isApproved: dbUser.isApproved,
+              role: token.role,
+              isApproved: token.isApproved,
             })
           } else {
-            // User no longer exists - but still return token to avoid JWT errors
-            // Session callback will handle the validation
-            console.warn('JWT callback - User not found, keeping token:', token.id)
+            console.warn('🔐 [JWT] ⚠️  User not found in DB (might be deleted):', token.id)
           }
         } catch (e) {
-          console.error('JWT callback error:', e)
-          // On database error, keep token - session callback will handle validation
+          console.error('🔐 [JWT] DB error (non-blocking):', (e as Error).message)
+          // Don't fail - keep existing token values
         }
       }
+
+      console.log('🔐 [JWT] ✓ Returning token:', {
+        hasId: !!token.id,
+        hasEmail: !!token.email,
+        hasRole: !!token.role,
+        isApproved: token.isApproved,
+      })
+      
       return token
     },
     async session({ session, token }) {
-      console.log('[SESSION CALLBACK] Starting...', {
+      console.log('[SESSION] Starting callback...', {
         hasSession: !!session,
         hasToken: !!token,
         tokenId: token?.id,
         tokenEmail: token?.email,
         tokenRole: token?.role,
-        tokenIsApproved: token?.isApproved,
       })
 
-      if (!session || !session.user || !token) {
-        console.error('[SESSION CALLBACK] ❌ Invalid session/token:', { hasSession: !!session, hasToken: !!token })
+      // CRITICAL: Must have both session and token
+      if (!session || !session.user) {
+        console.error('[SESSION] ❌ No session object')
         return session
       }
 
-      // STEP 1: Initialize user fields from token
+      if (!token) {
+        console.error('[SESSION] ❌ No token')
+        return session
+      }
+
+      // CRITICAL: Must have token ID and email
+      if (!token.id || !token.email) {
+        console.error('[SESSION] ❌ Token missing critical fields:', {
+          hasId: !!token.id,
+          hasEmail: !!token.email,
+        })
+        return session
+      }
+
+      // Set user fields from token (token is the source of truth)
       session.user.id = token.id as string
       session.user.email = token.email as string
-      session.user.name = token.name as string
+      session.user.name = (token.name as string) || ''
       session.user.role = (token.role as 'ADMIN' | 'USER') || 'USER'
       ;(session.user as any).isApproved = token.isApproved === true
 
-      console.log('[SESSION CALLBACK] Step 1 - Initialized from token:', {
+      console.log('[SESSION] ✓ Step 1 - Set from token:', {
         userId: session.user.id,
         email: session.user.email,
         role: session.user.role,
         isApproved: (session.user as any).isApproved,
       })
 
-      // STEP 2: Fetch latest data from database
-      try {
-        console.log('[SESSION CALLBACK] Step 2 - Fetching from database...')
-        
-        const dbUser = await prisma.user.findUnique({
-          where: { id: token.id as string },
-          select: { 
-            email: true,
-            name: true,
-            isApproved: true,
-            profileImage: true,
-            role: true
-          },
-        })
-
-        if (dbUser) {
-          console.log('[SESSION CALLBACK] ✓ Found user in DB:', {
-            email: dbUser.email,
-            role: dbUser.role,
-            isApproved: dbUser.isApproved,
-          })
-
-          // Always enforce role based on email
-          const enforcedRole = ((dbUser.email ?? '').toLowerCase() === 'admin@financialpanel.com' ? 'ADMIN' : 'USER')
-
-          session.user.role = enforcedRole
-          session.user.email = dbUser.email
-          session.user.name = dbUser.name || session.user.name
-          session.user.image = dbUser.profileImage || (token.image as string) || null
-          ;(session.user as any).isApproved = dbUser.isApproved === true
-
-          console.log('[SESSION CALLBACK] ✓ Step 2 - Updated from DB:', {
-            role: enforcedRole,
-            isApproved: (session.user as any).isApproved,
-          })
-        } else {
-          console.warn('[SESSION CALLBACK] ⚠️  User not found in DB, using token values')
-          session.user.role = (token.role as 'ADMIN' | 'USER') || 'USER'
-          ;(session.user as any).isApproved = token.isApproved === true
-        }
-      } catch (dbError) {
-        console.error('[SESSION CALLBACK] ❌ DB error:', (dbError as Error).message)
-        // Keep values from token
-        session.user.role = (token.role as 'ADMIN' | 'USER') || 'USER'
-        session.user.image = (token.image as string) || null
-        ;(session.user as any).isApproved = token.isApproved === true
-      }
-
-      // STEP 3: Final validation
-      if (!session.user.role || (session.user.role !== 'ADMIN' && session.user.role !== 'USER')) {
-        console.error('[SESSION CALLBACK] ❌ Invalid role, forcing USER')
+      // Validate role is valid
+      if (session.user.role !== 'ADMIN' && session.user.role !== 'USER') {
+        console.error('[SESSION] ❌ Invalid role from token, forcing USER:', session.user.role)
         session.user.role = 'USER'
       }
 
+      // Validate isApproved is boolean
       if (typeof (session.user as any).isApproved !== 'boolean') {
-        console.error('[SESSION CALLBACK] ❌ Invalid isApproved, forcing false')
+        console.warn('[SESSION] ⚠️  isApproved not boolean, resetting')
         ;(session.user as any).isApproved = false
       }
 
-      console.log('[SESSION CALLBACK] ✓ Completed successfully:', {
+      console.log('[SESSION] ✓ Callback complete:', {
         userId: session.user.id,
         email: session.user.email,
         role: session.user.role,

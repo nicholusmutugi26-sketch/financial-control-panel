@@ -48,26 +48,26 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(validatedData.password, 12)
 
-    // Check if this is the first user (make them admin)
+    // Check if this is the first user (make them auto-approved since they'll be admin)
     const userCount = await prisma.user.count()
-    const role = userCount === 0 ? 'ADMIN' : 'USER'
-    const isApproved = userCount === 0 // Only first user (admin) is auto-approved
+    const isApproved = userCount === 0 // Only first user is auto-approved
 
-    // Create user
+    // Create user - DO NOT store role, it will be derived from email
     const user = await prisma.user.create({
       data: {
         name: validatedData.name,
         email: normalizedEmail,
         password: hashedPassword,
         phoneNumber: validatedData.phoneNumber,
-        role,
+        // NOTE: DO NOT set 'role' field - it will be determined from email in auth.ts
+        // First user (email: admin@financialpanel.com) will automatically get ADMIN role
+        // All others get USER role
         isApproved,
       },
       select: {
         id: true,
         name: true,
         email: true,
-        role: true,
         phoneNumber: true,
         isApproved: true,
         createdAt: true,
@@ -75,6 +75,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Create audit log
+    const derivedRole = normalizedEmail === 'admin@financialpanel.com' ? 'ADMIN' : 'USER'
     await prisma.auditLog.create({
       data: {
         action: 'USER_REGISTERED',
@@ -84,7 +85,8 @@ export async function POST(request: NextRequest) {
         changes: {
           email: user.email,
           name: user.name,
-          role: user.role,
+          derivedRole: derivedRole,
+          isApproved: isApproved,
         }
       }
     })

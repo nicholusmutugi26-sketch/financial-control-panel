@@ -60,25 +60,34 @@ export default function LoginPage() {
       const lowercaseEmail = data.email.toLowerCase()
       console.log('📱 [LOGIN] Attempting login for:', lowercaseEmail)
 
-      // Use NextAuth's signIn with redirect: true for automatic handling
-      // This ensures the session is properly established before any redirect
+      // Use NextAuth's signIn with redirect: false to control the flow ourselves
+      // This allows us to wait for the session to be fully established
       const result = await signIn('credentials', {
         email: lowercaseEmail,
         password: data.password,
-        redirect: true, // Let NextAuth handle redirect
-        callbackUrl: '/dashboard', // Where to redirect after login
+        redirect: false, // Handle redirect manually to ensure session is ready
       })
 
-      // If signIn returned (only if redirect: false), we have an error
+      console.log('📱 [LOGIN] signIn result:', { ok: result?.ok, error: result?.error, status: result?.status })
+
+      // If signIn failed, show error
       if (!result?.ok || result?.error) {
-        console.error('📱 [LOGIN] ❌ Login failed:', result?.error)
+        console.error('📱 [LOGIN] ❌ Credentials invalid')
         toast.error('Invalid email or password')
         setIsLoading(false)
         return
       }
 
-      // signIn will redirect automatically, so we shouldn't reach here
-      console.log('📱 [LOGIN] ✓ SignIn completed, redirecting...')
+      // signIn succeeded, now wait for session to be established
+      console.log('📱 [LOGIN] ✓ Credentials valid, waiting for session...')
+      
+      // Give NextAuth time to set the session cookie
+      await new Promise(resolve => setTimeout(resolve, 100))
+
+      // Now redirect to dashboard - NextAuth will handle the session
+      console.log('📱 [LOGIN] ✓ Redirecting to dashboard')
+      toast.success('Logged in successfully')
+      router.push('/dashboard')
     } catch (error) {
       console.error('📱 [LOGIN] ❌ Login error:', error)
       toast.error('Something went wrong')
