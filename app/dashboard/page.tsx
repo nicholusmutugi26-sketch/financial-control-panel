@@ -7,13 +7,16 @@ import { redirect } from 'next/navigation'
  * CRITICAL: This is a security checkpoint - validate role and redirect
  */
 export default async function DashboardRootPage() {
-  // Wait a bit for session to be established after login
-  await new Promise(resolve => setTimeout(resolve, 100))
-
+  // Get session immediately - middleware already checked for token
   const session = await getServerSession(authOptions)
 
+  console.log('[DASHBOARD-ROOT] Page loaded:', {
+    hasSession: !!session,
+    timestamp: new Date().toISOString()
+  })
+
   if (!session) {
-    console.warn('[DASHBOARD] No session found, redirecting to login')
+    console.warn('[DASHBOARD-ROOT] No session found, redirecting to login')
     redirect('/auth/login')
   }
 
@@ -22,7 +25,7 @@ export default async function DashboardRootPage() {
   const isAdmin = userRole === 'ADMIN'
   const isUser = userRole === 'USER'
 
-  console.log('[DASHBOARD] Root page - Role check:', {
+  console.log('[DASHBOARD-ROOT] Session validation:', {
     userId: session.user?.id,
     email: session.user?.email,
     tokenRole: session.user?.role,
@@ -35,8 +38,9 @@ export default async function DashboardRootPage() {
 
   // SAFETY: If role is unrecognized, redirect to login
   if (!isAdmin && !isUser) {
-    console.error('[DASHBOARD] SECURITY: Unrecognized role detected!', {
+    console.error('[DASHBOARD-ROOT] SECURITY: Unrecognized role detected!', {
       role: session.user?.role,
+      normalizedRole: userRole,
       email: session.user?.email
     })
     redirect('/auth/login')
@@ -44,22 +48,22 @@ export default async function DashboardRootPage() {
 
   // Check approval status first - redirect if not approved (unless admin)
   if (!isAdmin && !(session.user as any)?.isApproved) {
-    console.log('[DASHBOARD] User not approved, redirecting to pending-approval')
+    console.log('[DASHBOARD-ROOT] User not approved, redirecting to pending-approval')
     redirect('/dashboard/pending-approval')
   }
 
   // CRITICAL ENFORCEMENT: Redirect based on role
   if (isAdmin) {
-    console.log('[DASHBOARD] Admin role detected, redirecting to /dashboard/admin/dashboard')
+    console.log('[DASHBOARD-ROOT] Admin role detected, redirecting to /dashboard/admin/dashboard')
     redirect('/dashboard/admin/dashboard')
   }
 
   if (isUser) {
-    console.log('[DASHBOARD] User role detected, redirecting to /dashboard/user/dashboard')
+    console.log('[DASHBOARD-ROOT] User role detected, redirecting to /dashboard/user/dashboard')
     redirect('/dashboard/user/dashboard')
   }
 
   // Fallback - should never reach here
-  console.error('[DASHBOARD] CRITICAL: Reached fallback redirect (should not happen)')
+  console.error('[DASHBOARD-ROOT] CRITICAL: Reached fallback redirect (should not happen)')
   redirect('/auth/login')
 }

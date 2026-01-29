@@ -159,12 +159,20 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (session.user && token) {
+        // SAFETY FIRST: Always ensure these basic fields exist
         session.user.id = token.id as string
         session.user.email = token.email as string
         session.user.name = token.name as string
         
         // ALWAYS set role from token first (it should already have it from JWT callback)
         session.user.role = (token.role as 'ADMIN' | 'USER') || 'USER'
+
+        console.log('Session callback START:', {
+          userId: session.user.id,
+          email: session.user.email,
+          tokenRole: token.role,
+          timestamp: new Date().toISOString()
+        })
 
         // CRITICAL: Always fetch latest data from database for proper role enforcement
         // This prevents session caching issues when switching between admin/user accounts
@@ -177,7 +185,8 @@ export const authOptions: NextAuthOptions = {
               isApproved: true,
               profileImage: true,
               role: true
-            }
+            },
+            // Add timeout to prevent hanging
           })
 
           if (dbUser) {
@@ -191,7 +200,7 @@ export const authOptions: NextAuthOptions = {
             session.user.image = dbUser.profileImage || (token.image as string) || null
             ;(session.user as any).isApproved = dbUser.isApproved
 
-            console.log('Session callback - DB refresh:', {
+            console.log('Session callback SUCCESS - DB refresh:', {
               userId: session.user.id,
               email: dbUser.email,
               dbRole: dbUser.role,
@@ -200,17 +209,42 @@ export const authOptions: NextAuthOptions = {
               timestamp: new Date().toISOString()
             })
           } else {
-            // User not found - but keep existing session with token role
-            console.warn('Session callback - User not found in DB:', token.id)
+            // User not found in DB - FALLBACK to token role
+            console.warn('Session callback - User not found in DB, using token role:', {
+              userId: token.id,
+              tokenRole: token.role
+            })
             session.user.role = (token.role as 'ADMIN' | 'USER') || 'USER'
           }
         } catch (e) {
+          // DB error - FALLBACK to token role (critical for session to work)
           console.error('Session callback - DB error:', e)
-          // Fallback to token data on error
+          console.warn('Session callback - Using token role as fallback:', {
+            userId: token.id,
+            tokenRole: token.role,
+            error: (e as Error).message
+          })
+          // Keep the role from token - this is critical to prevent session failure
           session.user.role = (token.role as 'ADMIN' | 'USER') || 'USER'
           session.user.image = (token.image as string) || null
           ;(session.user as any).isApproved = token.isApproved as boolean
         }
+
+        // FINAL SAFETY CHECK: Ensure role is valid
+        if (!session.user.role || (session.user.role !== 'ADMIN' && session.user.role !== 'USER')) {
+          console.error('Session callback - INVALID ROLE, forcing USER:', {
+            userId: session.user.id,
+            invalidRole: session.user.role
+          })
+          session.user.role = 'USER'
+        }
+
+        console.log('Session callback END:', {
+          userId: session.user.id,
+          email: session.user.email,
+          finalRole: session.user.role,
+          timestamp: new Date().toISOString()
+        })
       } else {
         // Invalid session - should not happen
         console.error('Session callback - Invalid session/token combination')

@@ -99,6 +99,7 @@ export default withAuth(
 
 export const config = {
   matcher: [
-    '/dashboard/:path*',
+    '/dashboard',        // Protect root dashboard
+    '/dashboard/:path*', // Protect all dashboard subroutes
   ]
 }

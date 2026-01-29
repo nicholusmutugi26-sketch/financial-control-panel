@@ -81,12 +81,21 @@ export default function LoginPage() {
       toast.success('Logged in successfully')
 
       // Use window.location.href for a full page reload
-      // This ensures the session cookie is sent to the server
-      // and the dashboard can properly read the session
+      // This ensures:
+      // 1. The session cookie is sent to the server
+      // 2. NextAuth completes the session establishment
+      // 3. The dashboard can properly read and validate the session
+      // 4. Middleware can check the token before loading /dashboard
       console.log('Performing full page redirect to dashboard')
+      
+      // Wait just long enough for NextAuth to write the session cookie
+      // But not so long that the user sees a delay
       setTimeout(() => {
+        // Clear the form to prevent re-submission
+        form.reset()
+        // Full page reload ensures cookies are sent to server
         window.location.href = '/dashboard'
-      }, 500) // Wait 500ms for NextAuth to fully establish the session
+      }, 300) // Reduced from 500ms based on cookie timing
     } catch (error) {
       console.error('Login error:', error)
       toast.error('Something went wrong')
