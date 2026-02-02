@@ -58,24 +58,70 @@ export default function LoginPage() {
     try {
       setIsLoading(true)
       const lowercaseEmail = data.email.toLowerCase()
-      console.log('📱 [LOGIN] Attempting login for:', lowercaseEmail)
+      console.log('📱 [LOGIN] Form submitted, attempting login for:', lowercaseEmail)
 
-      // Use signIn with redirect: true but custom callback URL
-      // This lets NextAuth handle session cookie management and redirect
-      // The callback URL will be /dashboard/verify which will do role-based routing
+      // Use signIn with redirect: false so we can control the flow
       const result = await signIn('credentials', {
         email: lowercaseEmail,
         password: data.password,
-        redirect: true,
-        callbackUrl: '/dashboard/verify', // Custom verification page for role-based routing
+        redirect: false, // Don't let NextAuth redirect, we'll handle it
       })
 
-      // If we get here, signIn with redirect: true returned (shouldn't happen normally)
-      console.log('📱 [LOGIN] signIn completed:', result)
+      console.log('📱 [LOGIN] signIn response:', { ok: result?.ok, error: result?.error, status: result?.status })
+
+      if (!result?.ok || result?.error) {
+        console.error('📱 [LOGIN] ❌ Authentication failed')
+        toast.error(result?.error || 'Invalid email or password')
+        setIsLoading(false)
+        return
+      }
+
+      console.log('📱 [LOGIN] ✓ Credentials validated by server')
+
+      // Show success toast BEFORE navigation
+      toast.success('Logged in successfully')
+
+      // Now we know credentials were valid, but we need to wait for the session cookie to be set
+      // The session cookie is set by NextAuth during the signIn() call, but the browser needs time to receive and store it
       
+      // Wait a bit then fetch session to confirm it's available
+      await new Promise((r) => setTimeout(r, 1000))
+
+      console.log('📱 [LOGIN] Fetching session to verify login...')
+      const session = await getSession()
+
+      if (!session?.user) {
+        console.error('📱 [LOGIN] ❌ Session not available after login')
+        toast.error('Session failed. Please try again.')
+        setIsLoading(false)
+        return
+      }
+
+      console.log('📱 [LOGIN] ✓ Session confirmed:', {
+        userId: session.user.id,
+        email: session.user.email,
+        role: session.user.role,
+      })
+
+      const role = (session.user.role || 'USER').toUpperCase()
+      const isApproved = !!(session.user as any)?.isApproved
+
+      console.log('📱 [LOGIN] ✓ Redirecting based on role:', { role, isApproved })
+
+      // Use a full page redirect (location.href) to ensure middleware gets the session cookie
+      if (!isApproved) {
+        console.log('📱 [LOGIN] Redirecting to pending-approval')
+        window.location.href = '/dashboard/pending-approval'
+      } else if (role === 'ADMIN') {
+        console.log('📱 [LOGIN] Redirecting to admin dashboard')
+        window.location.href = '/dashboard/admin/dashboard'
+      } else {
+        console.log('📱 [LOGIN] Redirecting to user dashboard')
+        window.location.href = '/dashboard/user/dashboard'
+      }
     } catch (error) {
-      console.error('📱 [LOGIN] ❌ Login error:', error)
-      toast.error('Something went wrong')
+      console.error('📱 [LOGIN] ❌ Unexpected error:', error)
+      toast.error('An error occurred. Please try again.')
       setIsLoading(false)
     }
   }

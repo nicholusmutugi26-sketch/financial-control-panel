@@ -274,17 +274,10 @@ export const authOptions: NextAuthOptions = {
       return session
     },
     async redirect({ url, baseUrl }) {
-      // IMPORTANT: When signIn() is called with redirect: true,
-      // this callback determines where the user is redirected after successful auth.
-      // We redirect to /dashboard/verify which is a client-side page that:
-      // 1. Checks the session (which is now available because the cookie was set)
-      // 2. Routes to the appropriate dashboard based on role and approval status
-      
-      console.log('[Redirect callback] User authenticated, redirecting to verify page', { url, baseUrl })
-      
-      // Always redirect to the verification page which handles role-based routing
-      // The verification page has access to the session at this point
-      return '/dashboard/verify'
+      // Since we use redirect: false in signIn(), this callback won't fire
+      // But keep it for reference - just return the URL as-is
+      console.log('[Redirect callback] Redirect callback called (should not happen with redirect: false)')
+      return url || baseUrl
     }
   },
   events: {
