@@ -274,9 +274,16 @@ export const authOptions: NextAuthOptions = {
       return session
     },
     async redirect({ url, baseUrl }) {
-      // Redirect to dashboard root which handles role-based routing
-      console.log('[Redirect callback]', { url, baseUrl })
-      return `${baseUrl}/dashboard`
+      // CRITICAL FIX: Don't redirect on server side during authentication
+      // The session cookies are not immediately available in the same request cycle
+      // Let the client handle all redirects after confirming session is established
+      // This prevents the redirect -> middleware check -> redirect loop
+      
+      console.log('[Redirect callback] Returning original URL (client will handle final redirect):', { url, baseUrl })
+      
+      // Return the original URL to avoid server redirect that races the session cookie
+      // The browser will naturally stay on the page, and client-side code will handle navigation
+      return url || baseUrl
     }
   },
   events: {

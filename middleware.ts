@@ -17,7 +17,7 @@ export default withAuth(
 
     // Safety check: ensure token has role
     if (!token) {
-      console.warn('[MIDDLEWARE] No token found, redirecting to login')
+      console.warn('[MIDDLEWARE] No token found for path:', path, '- redirecting to login')
       return NextResponse.redirect(new URL('/auth/login', req.url))
     }
 
@@ -26,7 +26,7 @@ export default withAuth(
     const isAdmin = userRole === 'ADMIN'
     const isUser = userRole === 'USER'
 
-    console.log(`[MIDDLEWARE] Route check - Path: ${path}, Role: ${userRole}, IsAdmin: ${isAdmin}, IsUser: ${isUser}`)
+    console.log(`[MIDDLEWARE] Route check - Path: ${path}, Role: ${userRole}, IsAdmin: ${isAdmin}, IsUser: ${isUser}, Email: ${token?.email}`)
 
     // 1. Check if user is approved (unless going to pending approval page or is admin)
     // Note: isApproved defaults to false, so only admins skip this check
@@ -87,9 +87,14 @@ export default withAuth(
     callbacks: {
       authorized: ({ token }) => {
         // Ensure token exists and has a valid role
-        if (!token) return false
+        if (!token) {
+          console.warn('[MIDDLEWARE] Authorization check: No token')
+          return false
+        }
         const role = String(token?.role || '').toUpperCase().trim()
-        return role === 'ADMIN' || role === 'USER'
+        const authorized = role === 'ADMIN' || role === 'USER'
+        console.log(`[MIDDLEWARE] Authorization check: role=${role}, authorized=${authorized}, email=${token?.email}`)
+        return authorized
       },
     },
     pages: {

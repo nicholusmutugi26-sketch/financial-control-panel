@@ -81,17 +81,24 @@ export default function LoginPage() {
       // signIn succeeded, now wait for session to be established and route by role
       console.log('📱 [LOGIN] ✓ Credentials valid, waiting for session...')
 
-      // Poll for session up to 2 seconds
-      const maxWait = 2000
+      // CRITICAL: Add a small delay to allow session cookie to be written before polling
+      // NextAuth callbacks are async and the cookie isn't immediately available
+      await new Promise((r) => setTimeout(r, 500))
+
+      // Poll for session up to 3 seconds
+      const maxWait = 3000
       const interval = 200
-      let waited = 0
+      let waited = 500 // Account for the initial delay above
       let session: any = null
 
       while (waited < maxWait) {
         // Fetch the session from NextAuth
         // eslint-disable-next-line no-await-in-loop
         session = await getSession()
-        if (session && session.user) break
+        if (session && session.user) {
+          console.log('📱 [LOGIN] ✓ Session acquired on attempt', Math.floor((waited - 500) / interval))
+          break
+        }
         // eslint-disable-next-line no-await-in-loop
         await new Promise((r) => setTimeout(r, interval))
         waited += interval
