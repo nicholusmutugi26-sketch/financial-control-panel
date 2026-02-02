@@ -91,8 +91,16 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token }) => {
-        // Ensure token exists and has a valid role
+      authorized: ({ token, req }) => {
+        const path = req.nextUrl.pathname
+        
+        // CRITICAL: Allow /dashboard/verify to proceed - it has its own session check
+        if (path === '/dashboard/verify') {
+          console.log('[MIDDLEWARE] Authorization callback: Allowing /dashboard/verify to proceed')
+          return true
+        }
+
+        // Ensure token exists and has a valid role for all other routes
         if (!token) {
           console.warn('[MIDDLEWARE] Authorization check: No token')
           return false
@@ -113,5 +121,5 @@ export const config = {
   matcher: [
     '/dashboard',        // Protect root dashboard
     '/dashboard/:path*', // Protect all dashboard subroutes
-  ]
+  ],
 }
