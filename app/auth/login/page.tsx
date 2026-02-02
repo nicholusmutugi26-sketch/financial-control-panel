@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { signIn, getSession } from 'next-auth/react'
+import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import Link from 'next/link'
@@ -58,100 +58,42 @@ export default function LoginPage() {
     try {
       setIsLoading(true)
       const lowercaseEmail = data.email.toLowerCase()
-      console.log('📱 [LOGIN] Form submitted, attempting login for:', lowercaseEmail)
+      console.log('📱 [LOGIN] Attempting login for:', lowercaseEmail)
 
-      // Use signIn with redirect: false so we can control the flow
+      // Simple and direct: call signIn and if successful, redirect
       const result = await signIn('credentials', {
         email: lowercaseEmail,
         password: data.password,
-        redirect: false, // Don't let NextAuth redirect, we'll handle it
+        redirect: false,
       })
 
-      console.log('📱 [LOGIN] signIn response:', { ok: result?.ok, error: result?.error, status: result?.status })
+      console.log('📱 [LOGIN] signIn result:', result)
 
-      if (!result?.ok || result?.error) {
-        console.error('📱 [LOGIN] ❌ Authentication failed:', result?.error)
+      if (!result?.ok) {
+        console.error('❌ Login failed:', result?.error)
         toast.error(result?.error || 'Invalid email or password')
         setIsLoading(false)
         return
       }
 
-      console.log('📱 [LOGIN] ✓ Credentials validated by server, showing success message')
+      // Credentials are valid! Show success and redirect
+      console.log('✓ Login successful, redirecting...')
       toast.success('Logged in successfully')
 
-      // CRITICAL: Wait for the session cookie to be set by NextAuth
-      // The signIn() call completes before the Set-Cookie header is processed
-      console.log('📱 [LOGIN] Waiting for session cookie to be written...')
-      await new Promise((r) => setTimeout(r, 1500))
+      // Determine dashboard based on email
+      const isAdmin = lowercaseEmail === 'admin@financialpanel.com'
+      const dashboardUrl = isAdmin ? '/dashboard/admin/dashboard' : '/dashboard/user/dashboard'
 
-      console.log('📱 [LOGIN] Attempting to fetch session...')
-      let sessionAttempt = 0
-      let session: any = null
+      console.log('Redirecting to:', dashboardUrl)
 
-      // Try to get the session, with retries
-      while (sessionAttempt < 5 && !session?.user) {
-        try {
-          console.log(`📱 [LOGIN] Session fetch attempt ${sessionAttempt + 1}/5...`)
-          session = await getSession()
-          
-          if (session?.user) {
-            console.log('📱 [LOGIN] ✓ Session retrieved:', {
-              userId: session.user.id,
-              email: session.user.email,
-              role: session.user.role,
-              isApproved: (session.user as any)?.isApproved,
-            })
-            break
-          } else {
-            console.log('📱 [LOGIN] No session yet, waiting...')
-            await new Promise((r) => setTimeout(r, 500))
-          }
-        } catch (e) {
-          console.error(`📱 [LOGIN] Error fetching session:`, e)
-          await new Promise((r) => setTimeout(r, 500))
-        }
-        sessionAttempt++
-      }
-
-      if (!session?.user) {
-        console.error('📱 [LOGIN] ❌ Could not get session after retries')
-        toast.error('Session failed. Please refresh and try again.')
-        setIsLoading(false)
-        return
-      }
-
-      const role = (session.user.role || 'USER').toUpperCase()
-      const isApproved = !!(session.user as any)?.isApproved
-
-      console.log('📱 [LOGIN] Determined redirect target:', { role, isApproved })
-
-      // Determine redirect path based on approval and role
-      let redirectPath = '/dashboard/user/dashboard'
-      
-      if (!isApproved) {
-        redirectPath = '/dashboard/pending-approval'
-        console.log('📱 [LOGIN] User not approved, redirecting to:', redirectPath)
-      } else if (role === 'ADMIN') {
-        redirectPath = '/dashboard/admin/dashboard'
-        console.log('📱 [LOGIN] Admin user, redirecting to:', redirectPath)
-      } else {
-        console.log('📱 [LOGIN] Regular user, redirecting to:', redirectPath)
-      }
-
-      // Give the browser time to fully process the session cookie before navigating
+      // Wait a tiny bit then redirect
       await new Promise((r) => setTimeout(r, 500))
-
-      console.log('📱 [LOGIN] Performing navigation to:', redirectPath)
-      // Use location.href for a full page navigation to ensure middleware gets the session cookie
-      window.location.href = redirectPath
       
+      // Simple redirect - let the server/middleware handle session validation
+      window.location.href = dashboardUrl
     } catch (error) {
-      console.error('📱 [LOGIN] ❌ Unexpected error in onSubmit:', error)
-      console.error('📱 [LOGIN] Error details:', {
-        message: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-      })
-      toast.error('An error occurred. Please try again.')
+      console.error('❌ Error:', error)
+      toast.error('An error occurred')
       setIsLoading(false)
     }
   }
