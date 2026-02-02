@@ -15,6 +15,12 @@ export default withAuth(
     const token = req.nextauth.token
     const path = req.nextUrl.pathname
 
+    // Allow the server-side verification route to run without token check
+    // This route performs its own server-side session check after NextAuth sets the cookie
+    if (path === '/dashboard/verify') {
+      return response
+    }
+
     // Safety check: ensure token has role
     if (!token) {
       console.warn('[MIDDLEWARE] No token found for path:', path, '- redirecting to login')

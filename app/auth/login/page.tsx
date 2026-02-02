@@ -60,37 +60,14 @@ export default function LoginPage() {
       const lowercaseEmail = data.email.toLowerCase()
       console.log('📱 [LOGIN] Attempting login for:', lowercaseEmail)
 
-      // Simple and direct: call signIn and if successful, redirect
-      const result = await signIn('credentials', {
+      // Use NextAuth's redirect flow to ensure the session cookie is set
+      // Redirect to a server-side verification route which will route based on role
+      await signIn('credentials', {
         email: lowercaseEmail,
         password: data.password,
-        redirect: false,
+        redirect: true,
+        callbackUrl: '/dashboard/verify',
       })
-
-      console.log('📱 [LOGIN] signIn result:', result)
-
-      if (!result?.ok) {
-        console.error('❌ Login failed:', result?.error)
-        toast.error(result?.error || 'Invalid email or password')
-        setIsLoading(false)
-        return
-      }
-
-      // Credentials are valid! Show success and redirect
-      console.log('✓ Login successful, redirecting...')
-      toast.success('Logged in successfully')
-
-      // Determine dashboard based on email
-      const isAdmin = lowercaseEmail === 'admin@financialpanel.com'
-      const dashboardUrl = isAdmin ? '/dashboard/admin/dashboard' : '/dashboard/user/dashboard'
-
-      console.log('Redirecting to:', dashboardUrl)
-
-      // Wait a tiny bit then redirect
-      await new Promise((r) => setTimeout(r, 500))
-      
-      // Simple redirect - let the server/middleware handle session validation
-      window.location.href = dashboardUrl
     } catch (error) {
       console.error('❌ Error:', error)
       toast.error('An error occurred')
