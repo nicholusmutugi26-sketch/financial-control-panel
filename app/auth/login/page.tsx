@@ -60,17 +60,16 @@ export default function LoginPage() {
       const lowercaseEmail = data.email.toLowerCase()
       console.log('📱 [LOGIN] Attempting login for:', lowercaseEmail)
 
-      // Use NextAuth's signIn with redirect: false to control the flow ourselves
-      // This allows us to wait for the session to be fully established
+      // Call signIn with redirect: false to handle navigation ourselves
+      // This gives us full control over when and where we redirect
       const result = await signIn('credentials', {
         email: lowercaseEmail,
         password: data.password,
-        redirect: false, // Handle redirect manually to ensure session is ready
+        redirect: false,
       })
 
       console.log('📱 [LOGIN] signIn result:', { ok: result?.ok, error: result?.error, status: result?.status })
 
-      // If signIn failed, show error
       if (!result?.ok || result?.error) {
         console.error('📱 [LOGIN] ❌ Credentials invalid')
         toast.error('Invalid email or password')
@@ -78,60 +77,79 @@ export default function LoginPage() {
         return
       }
 
-      // signIn succeeded, now wait for session to be established and route by role
-      console.log('📱 [LOGIN] ✓ Credentials valid, waiting for session...')
+      console.log('📱 [LOGIN] ✓ Credentials accepted by server, waiting for session...')
 
-      // CRITICAL: Add a small delay to allow session cookie to be written before polling
-      // NextAuth callbacks are async and the cookie isn't immediately available
-      await new Promise((r) => setTimeout(r, 500))
+      // CRITICAL: Wait longer before checking for session
+      // NextAuth needs time to:
+      // 1. Run all callbacks (jwt, session, redirect)
+      // 2. Set the session cookie on the client
+      // On Vercel this can take longer due to network latency
+      await new Promise((r) => setTimeout(r, 800))
 
-      // Poll for session up to 3 seconds
-      const maxWait = 3000
-      const interval = 200
-      let waited = 500 // Account for the initial delay above
+      // Poll for session multiple times with longer interval
       let session: any = null
+      const maxAttempts = 15 // 15 * 300ms = 4.5 seconds total
+      let attempt = 0
 
-      while (waited < maxWait) {
-        // Fetch the session from NextAuth
+      while (attempt < maxAttempts && (!session || !session.user)) {
+        attempt++
+        console.log(`📱 [LOGIN] Polling for session (attempt ${attempt}/${maxAttempts})...`)
+        
         // eslint-disable-next-line no-await-in-loop
         session = await getSession()
+        
         if (session && session.user) {
-          console.log('📱 [LOGIN] ✓ Session acquired on attempt', Math.floor((waited - 500) / interval))
+          console.log(`📱 [LOGIN] ✓ Session acquired on attempt ${attempt}`)
           break
         }
-        // eslint-disable-next-line no-await-in-loop
-        await new Promise((r) => setTimeout(r, interval))
-        waited += interval
+
+        if (attempt < maxAttempts) {
+          // eslint-disable-next-line no-await-in-loop
+          await new Promise((r) => setTimeout(r, 300))
+        }
       }
 
       if (!session || !session.user) {
-        console.error('📱 [LOGIN] ❌ Session not established after signIn')
-        toast.error('Login succeeded but session not ready. Please try again.')
+        console.error('📱 [LOGIN] ❌ Session not established after all attempts')
+        toast.error('Login failed: session not established. Please try again.')
         setIsLoading(false)
         return
       }
+
+      console.log('📱 [LOGIN] ✓ Session confirmed:', {
+        userId: session.user.id,
+        email: session.user.email,
+        role: session.user.role,
+        isApproved: session.user.isApproved,
+      })
 
       // Route based on role and approval
       const role = (session.user.role || 'USER').toUpperCase()
       const isApproved = !!(session.user?.isApproved)
 
+      console.log('📱 [LOGIN] ✓ Session ready, determining redirect path...', { role, isApproved })
+
+      // Show success message
       toast.success('Logged in successfully')
-      console.log('📱 [LOGIN] ✓ Session ready, role:', role, 'isApproved:', isApproved)
+
+      // Wait additional time to ensure browser has persisted the session cookie
+      // before we navigate away from the login page
+      await new Promise((r) => setTimeout(r, 500))
 
       if (!isApproved) {
-        // Use full navigation to avoid client/server redirect race
-        window.location.assign('/dashboard/pending-approval')
+        console.log('📱 [LOGIN] Redirecting to pending-approval (user not approved)')
+        router.push('/dashboard/pending-approval')
         return
       }
 
       if (role === 'ADMIN') {
-        // Force a full page load so the server-side middleware sees the established session
-        window.location.assign('/dashboard/admin/dashboard')
+        console.log('📱 [LOGIN] Redirecting to admin dashboard')
+        router.push('/dashboard/admin/dashboard')
         return
       }
 
-      // Default to user dashboard - use full navigation
-      window.location.assign('/dashboard/user/dashboard')
+      console.log('📱 [LOGIN] Redirecting to user dashboard')
+      router.push('/dashboard/user/dashboard')
     } catch (error) {
       console.error('📱 [LOGIN] ❌ Login error:', error)
       toast.error('Something went wrong')

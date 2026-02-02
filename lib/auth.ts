@@ -274,15 +274,13 @@ export const authOptions: NextAuthOptions = {
       return session
     },
     async redirect({ url, baseUrl }) {
-      // CRITICAL FIX: Don't redirect on server side during authentication
-      // The session cookies are not immediately available in the same request cycle
-      // Let the client handle all redirects after confirming session is established
-      // This prevents the redirect -> middleware check -> redirect loop
+      // IMPORTANT: With redirect: false in signIn(), this callback doesn't fire
+      // But keep it for reference - we let the client handle routing after confirming session
       
-      console.log('[Redirect callback] Returning original URL (client will handle final redirect):', { url, baseUrl })
+      console.log('[Redirect callback] URL after auth:', { url, baseUrl })
       
-      // Return the original URL to avoid server redirect that races the session cookie
-      // The browser will naturally stay on the page, and client-side code will handle navigation
+      // Just return the URL - don't redirect
+      // Let client-side code handle navigation after session is confirmed
       return url || baseUrl
     }
   },
