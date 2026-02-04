@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { utapi } from '@/server/uploadthing'
+import { safeUploadFile } from '@/lib/uploadthing'
 
 export const runtime = 'nodejs'
 
@@ -58,13 +58,13 @@ export async function POST(req: Request) {
     let fileUrl: string
     try {
       console.log('Uploading file to UploadThing...')
-      const uploadedFiles = await utapi.uploadFiles(file)
+      const uploadData = await safeUploadFile(file, { userId })
       
-      if (!uploadedFiles || uploadedFiles.length === 0 || !uploadedFiles[0]?.data?.url) {
+      if (!uploadData?.url) {
         throw new Error('UploadThing returned no file URL')
       }
 
-      fileUrl = uploadedFiles[0].data.url
+      fileUrl = uploadData.url
       console.log('File uploaded successfully:', fileUrl)
     } catch (uploadError) {
       console.error('File upload error:', uploadError)
