@@ -593,19 +593,19 @@ export async function POST(request: NextRequest) {
       let analysisColor = colors.textPrimary
       
       if (spendingRatio > 1.1) {
-        spendingAnalysis = '⚠️  OVER-SPENDING: Expenditures exceed budget allocations by ' + ((spendingRatio - 1) * 100).toFixed(1) + '%'
+        spendingAnalysis = 'OVER-SPENDING: Expenditures exceed budget allocations by ' + ((spendingRatio - 1) * 100).toFixed(1) + '%'
         analysisColor = colors.danger
       } else if (spendingRatio > 0.9) {
-        spendingAnalysis = '✅ OPTIMAL: Excellent budget utilization with ' + utilization + '% spending rate'
+        spendingAnalysis = 'OPTIMAL: Excellent budget utilization with ' + utilization + '% spending rate'
         analysisColor = colors.success
       } else if (spendingRatio > 0.7) {
-        spendingAnalysis = '📈 HEALTHY: Good spending momentum at ' + utilization + '% utilization'
+        spendingAnalysis = 'HEALTHY: Good spending momentum at ' + utilization + '% utilization'
         analysisColor = colors.primaryLight
       } else if (spendingRatio > 0.4) {
-        spendingAnalysis = '⚡ MODERATE: Steady spending at ' + utilization + '% - room for acceleration'
+        spendingAnalysis = 'MODERATE: Steady spending at ' + utilization + '% - room for acceleration'
         analysisColor = colors.warning
       } else {
-        spendingAnalysis = '🐌 LOW ACTIVITY: Only ' + utilization + '% utilization - consider increasing spending pace'
+        spendingAnalysis = 'LOW ACTIVITY: Only ' + utilization + '% utilization - consider increasing spending pace'
         analysisColor = colors.danger
       }
       

@@ -1,7 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['uploadthing.com', 'lh3.googleusercontent.com'],
+    domains: [
+      'uploadthing.com',
+      'lh3.googleusercontent.com',
+      '*.supabase.co',
+    ],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**.supabase.co',
+      },
+    ],
   },
   // Socket.IO and real-time support configuration
   serverRuntimeConfig: {
