@@ -1,36 +1,8 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { writeFile, mkdir } from 'fs/promises'
-import path from 'path'
-import { v4 as uuidv4 } from 'uuid'
-import { existsSync } from 'fs'
+import { utapi } from '@/server/uploadthing'
 
 export const runtime = 'nodejs'
-
-// Local file upload fallback function
-async function uploadFileLocally(file: File): Promise<string> {
-  try {
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-    const fileExtension = file.name.split('.').pop()
-    const fileName = `${uuidv4()}.${fileExtension}`
-
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'profiles')
-    
-    // Create directory if it doesn't exist
-    if (!existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true })
-    }
-
-    const filePath = path.join(uploadDir, fileName)
-    await writeFile(filePath, buffer)
-
-    return `/uploads/profiles/${fileName}`
-  } catch (error) {
-    console.error('Local upload error:', error)
-    throw error
-  }
-}
 
 export async function POST(req: Request) {
   try {
@@ -82,11 +54,17 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    // Upload file locally
+    // Upload file to UploadThing
     let fileUrl: string
     try {
-      console.log('Uploading file locally...')
-      fileUrl = await uploadFileLocally(file)
+      console.log('Uploading file to UploadThing...')
+      const uploadedFiles = await utapi.uploadFiles(file)
+      
+      if (!uploadedFiles || uploadedFiles.length === 0 || !uploadedFiles[0]?.data?.url) {
+        throw new Error('UploadThing returned no file URL')
+      }
+
+      fileUrl = uploadedFiles[0].data.url
       console.log('File uploaded successfully:', fileUrl)
     } catch (uploadError) {
       console.error('File upload error:', uploadError)
