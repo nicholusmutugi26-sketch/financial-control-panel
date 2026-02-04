@@ -1,8 +1,13 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { safeUploadFile } from '@/lib/uploadthing'
+import { UTApi } from 'uploadthing/server'
 
 export const runtime = 'nodejs'
+
+// Initialize UploadThing API
+const utapi = new UTApi({
+  apiKey: process.env.UPLOADTHING_SECRET,
+})
 
 export async function POST(req: Request) {
   try {
@@ -58,13 +63,27 @@ export async function POST(req: Request) {
     let fileUrl: string
     try {
       console.log('Uploading file to UploadThing...')
-      const uploadData = await safeUploadFile(file, { userId })
       
-      if (!uploadData?.url) {
+      // Convert File to Buffer for UploadThing
+      const buffer = await file.arrayBuffer()
+      const fileBuffer = Buffer.from(buffer)
+      
+      // Upload using UploadThing API
+      const uploadResponse = await utapi.uploadFiles([
+        {
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          customId: userId,
+          data: fileBuffer,
+        }
+      ])
+
+      if (!uploadResponse || uploadResponse.length === 0 || !uploadResponse[0]?.data?.url) {
         throw new Error('UploadThing returned no file URL')
       }
 
-      fileUrl = uploadData.url
+      fileUrl = uploadResponse[0].data.url
       console.log('File uploaded successfully:', fileUrl)
     } catch (uploadError) {
       console.error('File upload error:', uploadError)
