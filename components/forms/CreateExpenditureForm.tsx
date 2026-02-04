@@ -49,8 +49,9 @@ export default function CreateExpenditureForm() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [lastAction, setLastAction] = useState<string | null>(null)
-  const [budgets, setBudgets] = useState<{ id: string; title: string }[]>([])
+  const [budgets, setBudgets] = useState<{ id: string; title: string; status?: string }[]>([])
   const [itemsForBudget, setItemsForBudget] = useState<{ id: string; name: string; unitPrice: number }[]>([])
+  const [noDisbursedBudgets, setNoDisbursedBudgets] = useState(false)
 
   const methods = useForm<ExpenditureFormValues>({
     resolver: zodResolver(expenditureSchema),
@@ -68,18 +69,31 @@ export default function CreateExpenditureForm() {
         if (!res.ok) return
         const json = await res.json()
         const raw = json.data || json.budgets || json.budgetsList || json
-        const list = (raw || []).map((b: any) => ({
-          id: b.id,
-          title: b.title || b.name || 'Untitled',
-          createdAt: b.createdAt || b.created_at || b.createdAtDate,
-        }))
+        
+        // Filter budgets: only APPROVED and with DISBURSED or PARTIALLY_DISBURSED status
+        const list = (raw || [])
+          .filter((b: any) => {
+            const status = b.status || ''
+            return status === 'APPROVED' || status === 'DISBURSED' || status === 'PARTIALLY_DISBURSED'
+          })
+          .map((b: any) => ({
+            id: b.id,
+            title: b.title || b.name || 'Untitled',
+            status: b.status,
+            createdAt: b.createdAt || b.created_at || b.createdAtDate,
+          }))
+        
         // sort latest first if createdAt present
         list.sort((a: any, b: any) => {
           const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0
           const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0
           return tb - ta
         })
-        if (mounted) setBudgets(list)
+        
+        if (mounted) {
+          setBudgets(list)
+          setNoDisbursedBudgets(list.length === 0)
+        }
       } catch (e) {
         // ignore
       }
@@ -207,21 +221,32 @@ export default function CreateExpenditureForm() {
                           handleBudgetChange(val)
                         }}
                         defaultValue={field.value}
-                        disabled={isLoading}
+                        disabled={isLoading || noDisbursedBudgets}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a budget" />
+                          <SelectValue placeholder={noDisbursedBudgets ? "No disbursed budgets available" : "Select a budget"} />
                         </SelectTrigger>
                         <SelectContent>
-                          {budgets.map(b => (
-                            <SelectItem key={b.id} value={b.id}>
-                              {b.title}
-                            </SelectItem>
-                          ))}
+                          {budgets.length === 0 ? (
+                            <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                              No budgets available
+                            </div>
+                          ) : (
+                            budgets.map(b => (
+                              <SelectItem key={b.id} value={b.id}>
+                                {b.title}
+                              </SelectItem>
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                     </FormControl>
-                    <FormDescription>Select a budget to load its items</FormDescription>
+                    <FormDescription>
+                      {noDisbursedBudgets 
+                        ? "You need an approved budget with disbursed funds to create expenditures"
+                        : "Select a budget to load its items"
+                      }
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
