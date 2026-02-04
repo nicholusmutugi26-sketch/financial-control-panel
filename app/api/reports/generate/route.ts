@@ -383,28 +383,26 @@ export async function POST(request: NextRequest) {
     let page = addNewPage()
     let y = 780
 
-    // Professional header with gradient effect
-    drawSectionBox(page, 0, 750, 612, 70, colors.primary, colors.primary)
-    y = 740
-    drawCenteredText(page, 'FINANCIAL CONTROL PANEL', y, 20, true, colors.white, timesBold)
-    y = 710
-    drawCenteredText(page, `${validatedData.type.toUpperCase()} FINANCIAL REPORT`, y, 16, true, colors.white, timesBold)
+    // Professional compact header - smaller and elegant
+    drawSectionBox(page, 0, 755, 612, 50, colors.primary, colors.primary)
+    y = 745
+    drawCenteredText(page, 'FINANCIAL CONTROL PANEL', y, 14, true, colors.white, timesBold)
+    y = 725
+    drawCenteredText(page, `${validatedData.type.toUpperCase()} REPORT`, y, 11, true, colors.white, helveticaBold)
 
-    // Report metadata in elegant box
-    y = 650
-    drawSectionBox(page, 50, y + 10, 512, 80, colors.bgLight, colors.border)
-    drawText(page, 'REPORT DETAILS', 70, y, 12, true, colors.primary, timesBold)
-    y -= 20
-    drawText(page, `Period: ${reportData.period}`, 70, y, 10, false, colors.textPrimary, timesRoman)
-    y -= 15
+    // Report metadata in elegant box with improved styling
+    y = 680
+    drawSectionBox(page, 50, y + 10, 512, 70, colors.bgLight, colors.border)
+    drawText(page, 'REPORT DETAILS', 70, y, 11, true, colors.primary, timesBold)
+    y -= 18
+    drawText(page, `Period: ${reportData.period}`, 70, y, 9, false, colors.textPrimary, timesRoman)
     drawText(page, `Generated: ${new Date().toLocaleDateString('en-US', { 
       year: 'numeric', month: 'long', day: 'numeric', 
       hour: '2-digit', minute: '2-digit' 
-    })}`, 70, y, 10, false, colors.textSecondary, timesRoman)
-    y -= 15
-    drawText(page, `Prepared by: ${session.user.name}`, 70, y, 10, false, colors.textSecondary, timesRoman)
-    y -= 15
-    drawText(page, `Report ID: ${reportId}`, 70, y, 9, false, colors.textLight, timesRoman)
+    })}`, 330, y, 9, false, colors.textSecondary, timesRoman)
+    y -= 13
+    drawText(page, `Prepared by: ${session.user.name || 'System'}`, 70, y, 9, false, colors.textSecondary, timesRoman)
+    drawText(page, `Report ID: ${reportId}`, 330, y, 8, false, colors.textLight, timesRoman)
 
     // Executive Summary Section with borders
     y -= 30
