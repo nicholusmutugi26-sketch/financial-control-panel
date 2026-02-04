@@ -1,16 +1,12 @@
 import type { Metadata, Viewport } from 'next'
-import { Poppins } from 'next/font/google'
 import './globals.css'
 import { Providers } from '@/components/providers/Providers'
 import { Toaster } from 'sonner'
 import PWAScript from '@/components/PWAScript'
 
-const poppins = Poppins({
-  weight: ['400', '500', '600', '700', '800'],
-  subsets: ['latin'],
-  fallback: ['system-ui', 'arial', 'sans-serif'],
-  variable: '--font-poppins'
-})
+// Use system fonts instead of Google Fonts to avoid network timeouts in build
+// Poppins fallback chain: system fonts are faster and more reliable
+const fontClass = 'font-sans'
 
 export const metadata: Metadata = {
   title: 'Financial Control Panel',
@@ -54,7 +50,7 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#7c3aed" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
       </head>
-      <body className={`${poppins.className} antialiased`}>
+      <body className="antialiased">
         <Providers>
           {children}
           <Toaster 

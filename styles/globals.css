@@ -2,8 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* System font stack - no external font fetching needed */
 @layer base {
   :root {
+    /* Use system fonts with proven fallback chain */
+    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    
     /* Light theme with blue-violet accent and vibrant colors */
     --background: 0 0% 100%;
     --foreground: 0 0% 3.6%;

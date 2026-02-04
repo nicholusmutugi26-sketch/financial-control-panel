@@ -52,7 +52,7 @@ module.exports = {
         },
       },
       fontFamily: {
-        poppins: ["var(--font-poppins)", "sans-serif"],
+        sans: ["var(--font-family)", "system-ui", "sans-serif"],
       },
       borderRadius: {
         lg: "var(--radius)",

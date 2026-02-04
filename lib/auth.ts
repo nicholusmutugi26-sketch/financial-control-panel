@@ -36,7 +36,6 @@ export const authOptions: NextAuthOptions = {
     signIn: "/auth/login",
     error: "/auth/login?error=credentials",
   },
-  trustHost: true,
   providers: [
     CredentialsProvider({
       name: "credentials",
