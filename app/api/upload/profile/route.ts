@@ -64,20 +64,18 @@ export async function POST(req: Request) {
     try {
       console.log('Uploading file to UploadThing...')
       
-      // Convert File to Buffer for UploadThing
-      const buffer = await file.arrayBuffer()
-      const fileBuffer = Buffer.from(buffer)
-      
-      // Upload using UploadThing API
-      const uploadResponse = await utapi.uploadFiles([
-        {
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          customId: userId,
-          data: fileBuffer,
-        }
-      ])
+      // Convert File to Buffer and create a Blob-like FileEsque object
+      const arrayBuffer = await file.arrayBuffer()
+      const fileBuffer = Buffer.from(arrayBuffer)
+
+      // Create a Blob (FileEsque) from the buffer for UploadThing
+      // UploadThing expects a Blob/File-like object with a `name` property
+      const blob = new Blob([fileBuffer], { type: file.type }) as any
+      blob.name = file.name
+      blob.customId = userId
+
+      // Upload using UploadThing API - pass the Blob/FileEsque in an array
+      const uploadResponse = await utapi.uploadFiles([blob])
 
       if (!uploadResponse || uploadResponse.length === 0 || !uploadResponse[0]?.data?.url) {
         throw new Error('UploadThing returned no file URL')
