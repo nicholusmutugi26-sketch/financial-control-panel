@@ -10,16 +10,20 @@ export default async function DashboardLayout({
   children: React.ReactNode
 }) {
   const session = await getServerSession(authOptions)
-
+  
   if (!session) {
     redirect('/auth/login')
   }
 
+  // Ensure session has user properties and derive role from email (source of truth)
+  const sessionUser = session.user as any
+  const userRole = ((sessionUser?.email ?? '').toLowerCase() === 'admin@financialpanel.com' ? 'ADMIN' : 'USER')
+
   console.log('DashboardLayout - Current session:', {
-    userId: session.user.id,
-    email: session.user.email,
-    role: session.user.role,
-    isApproved: (session.user as any).isApproved,
+    userId: sessionUser?.id,
+    email: sessionUser?.email,
+    role: userRole,
+    isApproved: sessionUser?.isApproved,
     timestamp: new Date().toISOString()
   })
 
@@ -29,7 +33,6 @@ export default async function DashboardLayout({
       id: true,
       name: true,
       email: true,
-      role: true,
       profileImage: true,
     },
   })
@@ -38,16 +41,23 @@ export default async function DashboardLayout({
     redirect('/auth/login')
   }
 
-  console.log('DashboardLayout - User from DB:', {
+  // CRITICAL: Pass session role (derived from email) not DB role (which can be null)
+  // userRole is guaranteed to be 'ADMIN' or 'USER'
+  const userWithSessionRole = {
+    ...user,
+    role: userRole, // Use the role we extracted above
+  }
+
+  console.log('[DashboardLayout] ✓ Passing to DashboardNav:', {
     userId: user.id,
     email: user.email,
-    role: user.role,
+    role: userWithSessionRole.role, // Should be 'ADMIN' or 'USER'
     timestamp: new Date().toISOString()
   })
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <DashboardNav user={user} />
+      <DashboardNav user={userWithSessionRole} />
       <div className="pt-16">
         <main className="container mx-auto px-4 py-8">
           {children}

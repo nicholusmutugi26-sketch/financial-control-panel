@@ -34,8 +34,9 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: "/auth/login",
-    error: "/auth/login",
+    error: "/auth/login?error=credentials",
   },
+  trustHost: true,
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -274,10 +275,27 @@ export const authOptions: NextAuthOptions = {
       return session
     },
     async redirect({ url, baseUrl }) {
-      // Since we use redirect: false in signIn(), this callback won't fire
-      // But keep it for reference - just return the URL as-is
-      console.log('[Redirect callback] Redirect callback called (should not happen with redirect: false)')
-      return url || baseUrl
+      // With redirect: false, this shouldn't be called during sign in
+      // But it may be called for other flows like signOut or user updates
+      // Only redirect to internal URLs, never external ones for security
+      console.log('[Redirect callback] Called with url:', url, 'baseUrl:', baseUrl)
+      
+      try {
+        // Allow callback URLs and relative URLs
+        if (url.startsWith('/')) {
+          return `${baseUrl}${url}`
+        }
+        
+        // Allow URLs that belong to our domain
+        if (new URL(url).origin === baseUrl) {
+          return url
+        }
+      } catch {
+        return baseUrl
+      }
+      
+      // Default to baseUrl for security
+      return baseUrl
     }
   },
   events: {

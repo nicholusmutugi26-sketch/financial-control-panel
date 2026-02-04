@@ -13,7 +13,10 @@ export default async function UserLayout({
     redirect('/auth/login')
   }
 
-  if (session.user.role !== 'USER') {
+  // Derive role from email (source of truth) to avoid token mismatches
+  const sessionEmail = String((session.user as any)?.email || '').toLowerCase().trim()
+  const sessionRole = sessionEmail === 'admin@financialpanel.com' ? 'ADMIN' : 'USER'
+  if (sessionRole !== 'USER') {
     redirect('/dashboard')
   }
 

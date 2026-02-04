@@ -65,7 +65,11 @@ export default function Sidebar({ user }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false)
   const { data: session, update } = useSession()
   const [isUploading, setIsUploading] = useState(false)
-  const navItems = user.role === 'ADMIN' ? adminNavItems : userNavItems
+  // Trust the server-passed `user.role` (provided by server layouts)
+  const navRole = String(user.role || 'USER').toUpperCase().trim()
+  const navItems = navRole === 'ADMIN' ? adminNavItems : userNavItems
+
+  console.log('[Sidebar] Role:', navRole, '| Showing items:', navItems.map(i => i.label).join(', '))
 
   const NavItem = ({ href, label, icon: Icon }: typeof navItems[0]) => {
     const isActive = pathname === href || pathname?.startsWith(`${href}/`)

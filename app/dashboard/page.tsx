@@ -29,9 +29,10 @@ export default async function DashboardRootPage() {
     redirect('/auth/login')
   }
 
-  // Extract and normalize role
+  // Derive role from email (source of truth) to avoid token mismatches
   const rawRole = session.user?.role
-  const userRole = typeof rawRole === 'string' ? rawRole.toUpperCase().trim() : ''
+  const userEmail = (session.user?.email ?? '').toLowerCase()
+  const userRole = userEmail === 'admin@financialpanel.com' ? 'ADMIN' : 'USER'
   const isAdmin = userRole === 'ADMIN'
   const isUser = userRole === 'USER'
 

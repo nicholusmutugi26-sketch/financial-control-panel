@@ -60,17 +60,57 @@ export default function LoginPage() {
       const lowercaseEmail = data.email.toLowerCase()
       console.log('📱 [LOGIN] Attempting login for:', lowercaseEmail)
 
-      // Use NextAuth's redirect flow to ensure the session cookie is set
-      // Redirect to a server-side verification route which will route based on role
-      await signIn('credentials', {
+      // Call signIn with redirect: false to get the result directly
+      const result = await signIn('credentials', {
         email: lowercaseEmail,
         password: data.password,
-        redirect: true,
+        redirect: false,
         callbackUrl: '/dashboard/verify',
       })
+
+      console.log('📱 [LOGIN] SignIn result:', {
+        ok: result?.ok,
+        error: result?.error,
+        status: result?.status,
+        url: result?.url,
+      })
+
+      // Check if authentication was successful
+      if (!result) {
+        console.error('📱 [LOGIN] No result from signIn')
+        toast.error('Login failed - please try again')
+        setIsLoading(false)
+        return
+      }
+
+      // Check for authentication errors
+      if (!result.ok || result.error) {
+        console.error('📱 [LOGIN] Authentication failed:', result.error)
+        toast.error(result.error || 'Invalid email or password')
+        setIsLoading(false)
+        return
+      }
+
+      // Success! Redirect to dashboard verify page
+      if (result.ok && result.url) {
+        console.log('📱 [LOGIN] Login successful, redirecting to:', result.url)
+        toast.success('Login successful!')
+        // Use window.location.href for a full page reload to ensure session is established
+        setTimeout(() => {
+          window.location.href = result.url || '/dashboard/verify'
+        }, 100)
+        return
+      }
+
+      // Fallback redirect
+      console.log('📱 [LOGIN] Login successful, using fallback redirect')
+      toast.success('Login successful!')
+      setTimeout(() => {
+        window.location.href = '/dashboard/verify'
+      }, 100)
     } catch (error) {
-      console.error('❌ Error:', error)
-      toast.error('An error occurred')
+      console.error('❌ [LOGIN] Catch block error:', error)
+      toast.error('An error occurred during login. Please check the console.')
       setIsLoading(false)
     }
   }

@@ -21,8 +21,23 @@ async function main() {
     },
   })
 
+  // Create Test User (non-admin)
+  const userPassword = await bcrypt.hash('user@financialpanel@2026', 12)
+  const testUser = await prisma.user.upsert({
+    where: { email: 'user@financialpanel.com' },
+    update: {},
+    create: {
+      email: 'user@financialpanel.com',
+      name: 'Test User',
+      password: userPassword,
+      phoneNumber: '254792919471',
+      isApproved: true,
+    },
+  })
+
   console.log('Seeding completed!')
   console.log('- Admin user created:', admin.email)
+  console.log('- Test user created:', testUser.email)
 }
 
 main()
