@@ -18,7 +18,7 @@ const nextConfig = {
     // Socket.IO initialization happens in the HTTP server runtime
   },
   publicRuntimeConfig: {
-    socketUrl: process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3000',
+    socketUrl: process.env.NEXT_PUBLIC_SOCKET_URL || 'https://financial-control-panel.vercel.app',
   },
   // Enable WebSocket support for Socket.IO
   experimental: {

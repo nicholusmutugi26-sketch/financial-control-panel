@@ -21,7 +21,7 @@ export function initSocket(server: HttpServer) {
 
     io = new SocketServer(server, {
       cors: {
-        origin: process.env.NEXTAUTH_URL || 'http://localhost:3000',
+        origin: process.env.NEXTAUTH_URL || 'https://financial-control-panel.vercel.app',
         methods: ['GET', 'POST'],
         credentials: true,
         allowedHeaders: ['Content-Type', 'Authorization'],
@@ -32,7 +32,7 @@ export function initSocket(server: HttpServer) {
     })
 
     console.log('[Socket.IO] SocketServer instance created', {
-      corsOrigin: process.env.NEXTAUTH_URL || 'http://localhost:3000',
+      corsOrigin: process.env.NEXTAUTH_URL || 'https://financial-control-panel.vercel.app',
       transports: ['websocket', 'polling'],
       timestamp: new Date().toISOString()
     })

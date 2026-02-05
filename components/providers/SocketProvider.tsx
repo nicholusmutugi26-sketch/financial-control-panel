@@ -48,7 +48,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       return
     }
 
-    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://financial-control-panel.vercel.app'
     
     console.log('[Socket.IO] Starting connection attempt', {
       url: socketUrl,
